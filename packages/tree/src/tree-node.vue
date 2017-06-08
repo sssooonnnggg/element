@@ -1,5 +1,5 @@
 <template>
-  <div class="el-tree-node" @click.stop="handleClick" @dbclick.stop="handleDoubleClick" @contextmenu.stop.prevent="handleRightClick($event)" v-show="node.visible" :class="{
+  <div class="el-tree-node" @click.stop="handleClick" @dblclick.stop="handleDoubleClick" @contextmenu.stop.prevent="handleRightClick($event)" v-show="node.visible" :class="{
         'is-expanded': childNodeRendered && expanded,
         'is-current': tree.store.currentNode === node,
         'is-hidden': !node.visible
