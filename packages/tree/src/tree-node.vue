@@ -1,7 +1,7 @@
 <template>
   <div class="el-tree-node"
     @click.stop="handleClick"
-    @contextmenu.stop="handleRightClick"
+    @contextmenu.stop="handleRightClick($event)"
     v-show="node.visible"
     :class="{
       'is-expanded': childNodeRendered && expanded,
@@ -145,7 +145,7 @@
         this.tree.$emit('node-click', this.node.data, this.node, this);
       },
 
-      handleRightClick() {
+      handleRightClick(event) {
         const store = this.tree.store;
         store.setCurrentNode(this.node);
         this.tree.$emit('current-change', store.currentNode ? store.currentNode.data : null, store.currentNode);
@@ -153,7 +153,7 @@
         if (this.tree.expandOnClickNode) {
           this.handleExpandIconClick();
         }
-        this.tree.$emit('node-right-click', this.node.data, this.node, this);
+        this.tree.$emit('node-right-click', event,  this.node.data, this.node, this);
       },
 
       handleExpandIconClick() {
