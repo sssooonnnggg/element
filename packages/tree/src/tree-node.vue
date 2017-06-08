@@ -1,7 +1,7 @@
 <template>
   <div class="el-tree-node"
     @click.stop="handleClick"
-    @contextmenu.prevent="handleRightClick"
+    @contextmenu.stop="handleRightClick"
     v-show="node.visible"
     :class="{
       'is-expanded': childNodeRendered && expanded,
