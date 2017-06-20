@@ -81,6 +81,7 @@
       resize: String,
       readonly: Boolean,
       autofocus: Boolean,
+      focus: Boolean,
       icon: String,
       disabled: Boolean,
       type: {
@@ -180,6 +181,10 @@
 
     mounted() {
       this.resizeTextarea();
+      if (this.focus) {
+        let element = this.$refs.input.$el;
+        element.focus();
+      }
     }
   };
 </script>
