@@ -160,9 +160,7 @@ export default {
   mounted() {
     this.resizeTextarea();
     if (this.focus) {
-      console.log('****************');
-      console.log(this.$refs.input.$el);
-      this.$refs.input.$el.focus();
+      this.$refs.input.focus();
     }
   }
 };
