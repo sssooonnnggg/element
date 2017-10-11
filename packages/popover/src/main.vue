@@ -18,17 +18,18 @@
 <script>
 import Popper from 'element-ui/src/utils/vue-popper';
 import { on, off } from 'element-ui/src/utils/dom';
-
 export default {
   name: 'ElPopover',
-
   mixins: [Popper],
-
   props: {
     trigger: {
       type: String,
       default: 'click',
       validator: value => ['click', 'focus', 'hover', 'manual'].indexOf(value) > -1
+    },
+    openDelay: {
+      type: Number,
+      default: 0
     },
     title: String,
     disabled: Boolean,
@@ -44,17 +45,14 @@ export default {
       default: 'fade-in-linear'
     }
   },
-
   watch: {
     showPopper(newVal, oldVal) {
       newVal ? this.$emit('show') : this.$emit('hide');
     }
   },
-
   mounted() {
     let reference = this.reference || this.$refs.reference;
     const popper = this.popper || this.$refs.popper;
-
     if (!reference && this.$slots.reference && this.$slots.reference[0]) {
       reference = this.referenceElm = this.$slots.reference[0].elm;
     }
@@ -68,7 +66,6 @@ export default {
       on(popper, 'mouseleave', this.handleMouseLeave);
     } else if (this.trigger === 'focus') {
       let found = false;
-
       if ([].slice.call(reference.children).length) {
         const children = reference.childNodes;
         const len = children.length;
@@ -93,7 +90,6 @@ export default {
       }
     }
   },
-
   methods: {
     doToggle() {
       this.showPopper = !this.showPopper;
@@ -105,7 +101,13 @@ export default {
       this.showPopper = false;
     },
     handleMouseEnter() {
-      this.showPopper = true;
+      if (this.openDelay) {
+        setTimeout(() => {
+          this.showPopper = true;
+        }, this.openDelay);
+      } else {
+        this.showPopper = true;
+      }
       clearTimeout(this._timer);
     },
     handleMouseLeave() {
@@ -116,7 +118,6 @@ export default {
     handleDocumentClick(e) {
       let reference = this.reference || this.$refs.reference;
       const popper = this.popper || this.$refs.popper;
-
       if (!reference && this.$slots.reference && this.$slots.reference[0]) {
         reference = this.referenceElm = this.$slots.reference[0].elm;
       }
@@ -129,10 +130,8 @@ export default {
       this.showPopper = false;
     }
   },
-
   destroyed() {
     const reference = this.reference;
-
     off(reference, 'click', this.doToggle);
     off(reference, 'mouseup', this.doClose);
     off(reference, 'mousedown', this.doShow);
