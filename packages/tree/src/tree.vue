@@ -9,17 +9,17 @@
 </template>
 
 <script>
-import TreeStore from './model/tree-store';
-import { t } from 'element-ui/src/locale';
-import emitter from 'element-ui/src/mixins/emitter';
+import TreeStore from "./model/tree-store";
+import { t } from "element-ui/src/locale";
+import emitter from "element-ui/src/mixins/emitter";
 
 export default {
-  name: 'ElTree',
+  name: "ElTree",
 
   mixins: [emitter],
 
   components: {
-    ElTreeNode: require('./tree-node.vue')
+    ElTreeNode: require("./tree-node.vue")
   },
 
   data() {
@@ -37,7 +37,7 @@ export default {
     emptyText: {
       type: String,
       default() {
-        return t('el.tree.emptyText');
+        return t("el.tree.emptyText");
       }
     },
     nodeKey: String,
@@ -61,9 +61,9 @@ export default {
     props: {
       default() {
         return {
-          children: 'children',
-          label: 'label',
-          icon: 'icon'
+          children: "children",
+          label: "label",
+          icon: "icon"
         };
       }
     },
@@ -113,7 +113,8 @@ export default {
 
   methods: {
     filter(value) {
-      if (!this.filterNodeMethod) throw new Error('[Tree] filterNodeMethod is required when filter');
+      if (!this.filterNodeMethod)
+        throw new Error("[Tree] filterNodeMethod is required when filter");
       this.store.filter(value);
     },
     getNodeKey(node, index) {
@@ -130,30 +131,46 @@ export default {
       return this.store.getCheckedKeys(leafOnly);
     },
     setCheckedNodes(nodes, leafOnly) {
-      if (!this.nodeKey) throw new Error('[Tree] nodeKey is required in setCheckedNodes');
+      if (!this.nodeKey)
+        throw new Error("[Tree] nodeKey is required in setCheckedNodes");
       this.store.setCheckedNodes(nodes, leafOnly);
     },
     setCheckedKeys(keys, leafOnly) {
-      if (!this.nodeKey) throw new Error('[Tree] nodeKey is required in setCheckedNodes');
+      if (!this.nodeKey)
+        throw new Error("[Tree] nodeKey is required in setCheckedNodes");
       this.store.setCheckedKeys(keys, leafOnly);
     },
     setChecked(data, checked, deep) {
       this.store.setChecked(data, checked, deep);
     },
     handleNodeExpand(nodeData, node, instance) {
-      this.broadcast('ElTreeNode', 'tree-node-expand', node);
-      this.$emit('node-expand', nodeData, node, instance);
+      this.broadcast("ElTreeNode", "tree-node-expand", node);
+      this.$emit("node-expand", nodeData, node, instance);
     },
     selectNode(data) {
       const node = this.store.getNode(data);
       if (node) {
         const store = this.store;
         store.setCurrentNode(node);
-        this.$emit('current-change', store.currentNode ? store.currentNode.data : null, store.currentNode);
-        if (this.expandOnClickNode) {
-          this.handleExpandIconClick();
-        }
-        this.$emit('node-click', node.data, node);
+        this.$emit(
+          "current-change",
+          store.currentNode ? store.currentNode.data : null,
+          store.currentNode
+        );
+        this.$emit("node-click", node.data, node);
+        node.expand(undefined, true);
+      }
+    },
+    collapseAllNode(data) {
+      const node = this.store.getNode(data);
+      if (node) {
+        node.collapseAll();
+      }
+    },
+    expandAllNode(data) {
+      const node = this.store.getNode(data);
+      if (node) {
+        node.expandAll();
       }
     }
   },

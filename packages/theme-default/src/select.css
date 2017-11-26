@@ -32,7 +32,7 @@
       & .el-input__icon {
         color: var(--select-input-color);
         font-size: var(--select-input-font-size);
-        transition: transform .3s;
+        transition: none;
         transform: translateY(-50%) rotateZ(180deg);
         line-height: 16px;
         top: 50%;

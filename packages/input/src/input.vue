@@ -34,14 +34,14 @@
   </div>
 </template>
 <script>
-import emitter from 'element-ui/src/mixins/emitter';
-import calcTextareaHeight from './calcTextareaHeight';
-import merge from 'element-ui/src/utils/merge';
+import emitter from "element-ui/src/mixins/emitter";
+import calcTextareaHeight from "./calcTextareaHeight";
+import merge from "element-ui/src/utils/merge";
 
 export default {
-  name: 'ElInput',
+  name: "ElInput",
 
-  componentName: 'ElInput',
+  componentName: "ElInput",
 
   mixins: [emitter],
 
@@ -64,7 +64,7 @@ export default {
     disabled: Boolean,
     type: {
       type: String,
-      default: 'text'
+      default: "text"
     },
     name: String,
     autosize: {
@@ -77,7 +77,7 @@ export default {
     },
     autoComplete: {
       type: String,
-      default: 'off'
+      default: "off"
     },
     form: String,
     maxlength: Number,
@@ -94,7 +94,7 @@ export default {
 
   computed: {
     validating() {
-      return this.$parent.validateState === 'validating';
+      return this.$parent.validateState === "validating";
     },
     textareaStyle() {
       return merge({}, this.textareaCalcStyle, { resize: this.resize });
@@ -102,16 +102,16 @@ export default {
   },
 
   watch: {
-    'value'(val, oldValue) {
+    value(val, oldValue) {
       this.setCurrentValue(val);
     }
   },
 
   methods: {
     handleBlur(event) {
-      this.$emit('blur', event);
+      this.$emit("blur", event);
       if (this.validateEvent) {
-        this.dispatch('ElFormItem', 'el.form.blur', [this.currentValue]);
+        this.dispatch("ElFormItem", "el.form.blur", [this.currentValue]);
       }
     },
     inputSelect() {
@@ -120,26 +120,30 @@ export default {
     resizeTextarea() {
       if (this.$isServer) return;
       var { autosize, type } = this;
-      if (!autosize || type !== 'textarea') return;
+      if (!autosize || type !== "textarea") return;
       const minRows = autosize.minRows;
       const maxRows = autosize.maxRows;
 
-      this.textareaCalcStyle = calcTextareaHeight(this.$refs.textarea, minRows, maxRows);
+      this.textareaCalcStyle = calcTextareaHeight(
+        this.$refs.textarea,
+        minRows,
+        maxRows
+      );
     },
     handleFocus(event) {
-      this.$emit('focus', event);
+      this.$emit("focus", event);
     },
     handleInput(event) {
       const value = event.target.value;
-      this.$emit('input', value);
+      this.$emit("input", value);
       this.setCurrentValue(value);
-      this.$emit('change', value);
+      this.$emit("change", value);
     },
     handleIconClick(event) {
       if (this.onIconClick) {
         this.onIconClick(event);
       }
-      this.$emit('click', event);
+      this.$emit("click", event);
     },
     setCurrentValue(value) {
       if (value === this.currentValue) return;
@@ -148,13 +152,16 @@ export default {
       });
       this.currentValue = value;
       if (this.validateEvent) {
-        this.dispatch('ElFormItem', 'el.form.change', [value]);
+        this.dispatch("ElFormItem", "el.form.change", [value]);
       }
+    },
+    setFocus() {
+      this.$refs.input.focus();
     }
   },
 
   created() {
-    this.$on('inputSelect', this.inputSelect);
+    this.$on("inputSelect", this.inputSelect);
   },
 
   mounted() {

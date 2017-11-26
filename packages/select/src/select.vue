@@ -65,7 +65,7 @@
       :icon="iconClass">
     </el-input>
     <transition
-      name="el-zoom-in-top"
+      name="el-zoom-in-top "
       @after-leave="doDestroy"
       @after-enter="handleMenuEnter">
       <el-select-menu

@@ -1,7 +1,10 @@
 import objectAssign from 'element-ui/src/utils/merge';
-import { markNodeData, NODE_KEY } from './util';
+import {
+  markNodeData,
+  NODE_KEY
+} from './util';
 
-const reInitChecked = function(node) {
+const reInitChecked = function (node) {
   const siblings = node.childNodes;
 
   let all = true;
@@ -26,7 +29,7 @@ const reInitChecked = function(node) {
   }
 };
 
-const getPropertyFromData = function(node, prop) {
+const getPropertyFromData = function (node, prop) {
   const props = node.store.props;
   const data = node.data || {};
   const config = props[prop];
@@ -127,7 +130,9 @@ export default class Node {
     }
 
     for (let i = 0, j = children.length; i < j; i++) {
-      this.insertChild({ data: children[i] });
+      this.insertChild({
+        data: children[i]
+      });
     }
   }
 
@@ -235,12 +240,34 @@ export default class Node {
 
   doCreateChildren(array, defaultProps = {}) {
     array.forEach((item) => {
-      this.insertChild(objectAssign({ data: item }, defaultProps));
+      this.insertChild(objectAssign({
+        data: item
+      }, defaultProps));
     });
   }
 
   collapse() {
     this.expanded = false;
+  }
+
+  collapseAll() {
+    let collapse = function (node) {
+      node.expanded = false;
+      node.childNodes.forEach(function (child) {
+        collapse(child);
+      });
+    };
+    collapse(this);
+  }
+
+  expandAll() {
+    let expand = function (node) {
+      node.expanded = true;
+      node.childNodes.forEach(function (child) {
+        expand(child);
+      });
+    };
+    expand(this);
   }
 
   shouldLoadData() {
@@ -319,9 +346,15 @@ export default class Node {
 
     newData.forEach((item, index) => {
       if (item[NODE_KEY]) {
-        newDataMap[item[NODE_KEY]] = { index, data: item };
+        newDataMap[item[NODE_KEY]] = {
+          index,
+          data: item
+        };
       } else {
-        newNodes.push({ index, data: item });
+        newNodes.push({
+          index,
+          data: item
+        });
       }
     });
 
@@ -329,8 +362,13 @@ export default class Node {
       if (!newDataMap[item[NODE_KEY]]) this.removeChildByData(item);
     });
 
-    newNodes.forEach(({ index, data }) => {
-      this.insertChild({ data }, index);
+    newNodes.forEach(({
+      index,
+      data
+    }) => {
+      this.insertChild({
+        data
+      }, index);
     });
 
     this.updateLeafState();
