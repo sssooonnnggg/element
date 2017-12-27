@@ -1,34 +1,54 @@
 <template>
-  <div class="el-tree-node" @click.stop="handleClick" @dblclick.stop="handleDoubleClick" @contextmenu.stop.prevent="handleRightClick($event)" v-show="node.visible" :class="{
+  <div class="el-tree-node"
+    v-if="!node.hidden"
+    @click.stop="handleClick"
+    @dblclick.stop="handleDoubleClick"
+    @contextmenu.stop.prevent="handleRightClick($event)"
+    v-show="node.visible"
+    :class="{
         'is-expanded': childNodeRendered && expanded,
-        'is-current': tree.store.currentNode === node,
+        'is-current': node.isCurrent,
         'is-hidden': !node.visible
       }">
-    <div class="el-tree-node__content" :style="{ 'padding-left': (node.level - 1) * tree.indent + 'px' }">
-      <span class="el-tree-node__expand-icon" @click.stop="handleExpandIconClick" :class="{ 'is-leaf': node.isLeaf, expanded: !node.isLeaf && expanded }">
+    <div class="el-tree-node__content"
+      :style="{ 'padding-left': indent + 'px' }"
+      v-if="!node.hiddenSelf">
+      <span class="el-tree-node__expand-icon"
+        @click.stop="handleExpandIconClick"
+        :class="{ 'is-leaf': node.isLeaf, expanded: !node.isLeaf && expanded }">
       </span>
-      <el-checkbox v-if="showCheckbox" v-model="node.checked" :indeterminate="node.indeterminate" @change="handleCheckChange" @click.native.stop="handleUserClick">
+      <el-checkbox v-if="showCheckbox"
+        v-model="node.checked"
+        :indeterminate="node.indeterminate"
+        @change="handleCheckChange"
+        @click.native.stop="handleUserClick">
       </el-checkbox>
-      <span v-if="node.loading" class="el-tree-node__loading-icon el-icon-loading">
+      <span v-if="node.loading"
+        class="el-tree-node__loading-icon el-icon-loading">
       </span>
       <node-content :node="node"></node-content>
     </div>
-    <div class="el-tree-node__children" v-if="expanded">
-      <el-tree-node :render-content="renderContent" v-for="child in node.childNodes" :key="getNodeKey(child)" :node="child" @node-expand="handleChildNodeExpand">
+    <div class="el-tree-node__children"
+      v-if="expanded || node.hiddenSelf">
+      <el-tree-node :render-content="renderContent"
+        v-for="child in node.childNodes"
+        :key="getNodeKey(child)"
+        :node="child"
+        @node-expand="handleChildNodeExpand">
       </el-tree-node>
     </div>
   </div>
 </template>
 
 <script type="text/jsx">
-import ElCollapseTransition from 'element-ui/src/transitions/collapse-transition';
-import ElCheckbox from 'element-ui/packages/checkbox';
-import emitter from 'element-ui/src/mixins/emitter';
+import ElCollapseTransition from "element-ui/src/transitions/collapse-transition";
+import ElCheckbox from "element-ui/packages/checkbox";
+import emitter from "element-ui/src/mixins/emitter";
 
 export default {
-  name: 'ElTreeNode',
+  name: "ElTreeNode",
 
-  componentName: 'ElTreeNode',
+  componentName: "ElTreeNode",
 
   mixins: [emitter],
 
@@ -56,10 +76,15 @@ export default {
         const node = this.node;
         const data = node.data;
         const store = node.store;
-        return (
-          parent.renderContent
-            ? parent.renderContent.call(parent._renderProxy, h, { _self: parent.tree.$vnode.context, node, data, store })
-            : <span class="el-tree-node__label">{this.node.label}</span>
+        return parent.renderContent ? (
+          parent.renderContent.call(parent._renderProxy, h, {
+            _self: parent.tree.$vnode.context,
+            node,
+            data,
+            store
+          })
+        ) : (
+          <span class="el-tree-node__label">{this.node.label}</span>
         );
       }
     }
@@ -77,19 +102,25 @@ export default {
   },
 
   watch: {
-    'node.indeterminate'(val) {
+    "node.indeterminate"(val) {
       this.handleSelectChange(this.node.checked, val);
     },
 
-    'node.checked'(val) {
+    "node.checked"(val) {
       this.handleSelectChange(val, this.node.indeterminate);
     },
 
-    'node.expanded'(val) {
+    "node.expanded"(val) {
       this.expanded = val;
       if (val) {
         this.childNodeRendered = true;
       }
+    }
+  },
+
+  computed:{
+    indent(){
+      return (this.node.indent - 1) * this.tree.indent;
     }
   },
 
@@ -103,54 +134,61 @@ export default {
     },
 
     handleSelectChange(checked, indeterminate) {
-      if (this.oldChecked !== checked && this.oldIndeterminate !== indeterminate) {
-        this.tree.$emit('check-change', this.node.data, checked, indeterminate);
+      if (
+        this.oldChecked !== checked &&
+        this.oldIndeterminate !== indeterminate
+      ) {
+        this.tree.$emit("check-change", this.node.data, checked, indeterminate);
       }
       this.oldChecked = checked;
       this.indeterminate = indeterminate;
     },
 
-    handleClick() {
+    setCurrentNode() {
       const store = this.tree.store;
-      store.setCurrentNode(this.node);
-      this.tree.$emit('current-change', store.currentNode ? store.currentNode.data : null, store.currentNode);
+      if (store.currentNode != undefined) store.currentNode.isCurrent = false;
       this.tree.currentNode = this;
+      this.node.isCurrent = true;
+      store.setCurrentNode(this.node);
+      this.tree.$emit(
+        "current-change",
+        store.currentNode ? store.currentNode.data : null,
+        store.currentNode
+      );
       if (this.tree.expandOnClickNode) {
         this.handleExpandIconClick();
       }
-      this.tree.$emit('node-click', this.node.data, this.node, this);
+    },
+
+    handleClick() {
+      this.setCurrentNode();
+      this.tree.$emit("node-click", this.node.data, this.node, this);
     },
 
     handleDoubleClick() {
-      const store = this.tree.store;
-      store.setCurrentNode(this.node);
-      this.tree.$emit('current-change', store.currentNode ? store.currentNode.data : null, store.currentNode);
-      this.tree.currentNode = this;
-      if (this.tree.expandOnClickNode) {
-        this.handleExpandIconClick();
-      }
-      this.tree.$emit('node-double-click', this.node.data, this.node, this);
+      this.setCurrentNode();
+      this.tree.$emit("node-double-click", this.node.data, this.node, this);
     },
 
     handleRightClick(event) {
-      const store = this.tree.store;
-      store.setCurrentNode(this.node);
-      this.tree.$emit('current-change', store.currentNode ? store.currentNode.data : null, store.currentNode);
-      this.tree.currentNode = this;
-      if (this.tree.expandOnClickNode) {
-        this.handleExpandIconClick();
-      }
-      this.tree.$emit('node-right-click', event, this.node.data, this.node, this);
+      this.setCurrentNode();
+      this.tree.$emit(
+        "node-right-click",
+        event,
+        this.node.data,
+        this.node,
+        this
+      );
     },
 
     handleExpandIconClick() {
       if (this.node.isLeaf) return;
       if (this.expanded) {
-        this.tree.$emit('node-collapse', this.node.data, this.node, this);
+        this.tree.$emit("node-collapse", this.node.data, this.node, this);
         this.node.collapse();
       } else {
         this.node.expand();
-        this.$emit('node-expand', this.node.data, this.node, this);
+        this.$emit("node-expand", this.node.data, this.node, this);
       }
     },
 
@@ -167,8 +205,8 @@ export default {
     },
 
     handleChildNodeExpand(nodeData, node, instance) {
-      this.broadcast('ElTreeNode', 'tree-node-expand', node);
-      this.tree.$emit('node-expand', nodeData, node, instance);
+      this.broadcast("ElTreeNode", "tree-node-expand", node);
+      this.tree.$emit("node-expand", nodeData, node, instance);
     }
   },
 
@@ -183,11 +221,11 @@ export default {
 
     const tree = this.tree;
     if (!tree) {
-      console.warn('Can not find node\'s tree.');
+      console.warn("Can not find node's tree.");
     }
 
     const props = tree.props || {};
-    const childrenKey = props['children'] || 'children';
+    const childrenKey = props["children"] || "children";
 
     this.$watch(`node.data.${childrenKey}`, () => {
       this.node.updateChildren();
@@ -201,7 +239,7 @@ export default {
     }
 
     if (this.tree.accordion) {
-      this.$on('tree-node-expand', node => {
+      this.$on("tree-node-expand", node => {
         if (this.node !== node) {
           this.node.collapse();
         }

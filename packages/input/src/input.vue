@@ -157,6 +157,9 @@ export default {
     },
     setFocus() {
       this.$refs.input.focus();
+    },
+    selectText() {
+      this.$refs.input.select();
     }
   },
 

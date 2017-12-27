@@ -18,14 +18,14 @@
         v-show="!hasNoMatch && data.length > 0"
         :class="{ 'is-filterable': filterable }"
         class="el-transfer-panel__list">
-        <el-checkbox
+        <el-checkbox-button
           class="el-transfer-panel__item"
           :label="item[keyProp]"
           :disabled="item[disabledProp]"
           :key="item[keyProp]"
           v-for="item in filteredData">
           <option-content :option="item"></option-content>
-        </el-checkbox>
+        </el-checkbox-button>
       </el-checkbox-group>
       <p
         class="el-transfer-panel__empty"
@@ -35,7 +35,7 @@
         v-show="data.length === 0 && !hasNoMatch">{{ t('el.transfer.noData') }}</p>
     </div>
     
-    <p class="el-transfer-panel__footer">
+    <p class="el-transfer-panel__footer" v-show="false">
       <el-checkbox
         v-model="allChecked"
         @change="handleAllCheckedChange"

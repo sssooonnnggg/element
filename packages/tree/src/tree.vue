@@ -1,8 +1,15 @@
 <template>
-  <div class="el-tree" :class="{ 'el-tree--highlight-current': highlightCurrent }">
-    <el-tree-node v-for="child in root.childNodes" :node="child" :props="props" :key="getNodeKey(child)" :render-content="renderContent" @node-expand="handleNodeExpand">
+  <div class="el-tree"
+    :class="{ 'el-tree--highlight-current': highlightCurrent }">
+    <el-tree-node v-for="child in root.childNodes"
+      :node="child"
+      :props="props"
+      :key="getNodeKey(child)"
+      :render-content="renderContent"
+      @node-expand="handleNodeExpand">
     </el-tree-node>
-    <div class="el-tree__empty-block" v-if="!root.childNodes || root.childNodes.length === 0">
+    <div class="el-tree__empty-block"
+      v-if="!root.childNodes || root.childNodes.length === 0">
       <span class="el-tree__empty-text">{{ emptyText }}</span>
     </div>
   </div>
@@ -151,6 +158,8 @@ export default {
       const node = this.store.getNode(data);
       if (node) {
         const store = this.store;
+        if (store.currentNode != undefined) store.currentNode.isCurrent = false;
+        node.isCurrent = true;
         store.setCurrentNode(node);
         this.$emit(
           "current-change",
@@ -171,6 +180,24 @@ export default {
       const node = this.store.getNode(data);
       if (node) {
         node.expandAll();
+      }
+    },
+    expandNode(data) {
+      const node = this.store.getNode(data);
+      if (node) {
+        node.expand();
+      }
+    },
+    collapseNode(data) {
+      const node = this.store.getNode(data);
+      if (node) {
+        node.collapse();
+      }
+    },
+    hideNode(nodeId, hidden) {
+      const node = this.store.getNode(id);
+      if (node) {
+        node.hidden = hidden;
       }
     }
   },

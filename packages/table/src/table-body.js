@@ -249,6 +249,7 @@ export default {
     },
 
     handleContextMenu(event, row) {
+      this.store.commit('setCurrentRow', row);
       this.handleEvent(event, row, 'contextmenu');
     },
 

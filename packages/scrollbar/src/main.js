@@ -114,6 +114,14 @@ export default {
 
       this.sizeHeight = (heightPercentage < 100) ? (heightPercentage + '%') : '';
       this.sizeWidth = (widthPercentage < 100) ? (widthPercentage + '%') : '';
+    },
+
+    scrollTo(item) {
+      const wrap = this.wrap;
+      let itemCenterPos = item.offsetTop + item.offsetHeight / 2;
+      let expectedPos = itemCenterPos - wrap.clientHeight / 2;
+      wrap.scrollTop = expectedPos > 0 ? expectedPos : 0;
+      this.handleScroll();
     }
   },
 

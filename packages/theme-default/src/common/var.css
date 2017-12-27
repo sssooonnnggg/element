@@ -597,7 +597,7 @@
   --transfer-panel-width: 200px;
   --transfer-panel-header-height: 36px;
   --transfer-panel-header-background: var(--color-dark-white);
-  --transfer-panel-footer-height: 36px;
+  --transfer-panel-footer-height: 0px;
   --transfer-panel-body-height: 246px;
   --transfer-item-height: 32px;
   --transfer-item-hover-background: var(--color-light-gray);

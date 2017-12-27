@@ -1,5 +1,4 @@
 <template>
-  <transition name="dialog-fade">
     <div class="el-dialog__wrapper" tabindex="-1" v-show="visible" @click.self="handleWrapperClick">
       <div
         class="el-dialog"
@@ -21,125 +20,124 @@
         </div>
       </div>
     </div>
-  </transition>
 </template>
 
 <script>
-  import Popup from 'element-ui/src/utils/popup';
-  import emitter from 'element-ui/src/mixins/emitter';
+import Popup from "element-ui/src/utils/popup";
+import emitter from "element-ui/src/mixins/emitter";
 
-  export default {
-    name: 'ElDialog',
+export default {
+  name: "ElDialog",
 
-    mixins: [Popup, emitter],
+  mixins: [Popup, emitter],
 
-    props: {
-      title: {
-        type: String,
-        default: ''
-      },
-
-      modal: {
-        type: Boolean,
-        default: true
-      },
-  
-      modalAppendToBody: {
-        type: Boolean,
-        default: true
-      },
-
-      lockScroll: {
-        type: Boolean,
-        default: true
-      },
-
-      closeOnClickModal: {
-        type: Boolean,
-        default: true
-      },
-
-      closeOnPressEscape: {
-        type: Boolean,
-        default: true
-      },
-
-      showClose: {
-        type: Boolean,
-        default: true
-      },
-
-      size: {
-        type: String,
-        default: 'small'
-      },
-
-      customClass: {
-        type: String,
-        default: ''
-      },
-
-      top: {
-        type: String,
-        default: '15%'
-      },
-      beforeClose: Function
+  props: {
+    title: {
+      type: String,
+      default: ""
     },
 
-    watch: {
-      visible(val) {
-        this.$emit('update:visible', val);
-        if (val) {
-          this.$emit('open');
-          this.$el.addEventListener('scroll', this.updatePopper);
-          this.$nextTick(() => {
-            this.$refs.dialog.scrollTop = 0;
-          });
-        } else {
-          this.$el.removeEventListener('scroll', this.updatePopper);
-          this.$emit('close');
-        }
-      }
+    modal: {
+      type: Boolean,
+      default: true
     },
 
-    computed: {
-      sizeClass() {
-        return `el-dialog--${ this.size }`;
-      },
-      style() {
-        return this.size === 'full' ? {} : { 'top': this.top };
-      }
+    modalAppendToBody: {
+      type: Boolean,
+      default: true
     },
 
-    methods: {
-      handleWrapperClick() {
-        if (!this.closeOnClickModal) return;
-        this.handleClose();
-      },
-      handleClose() {
-        if (typeof this.beforeClose === 'function') {
-          this.beforeClose(this.hide);
-        } else {
-          this.hide();
-        }
-      },
-      hide(cancel) {
-        if (cancel !== false) {
-          this.$emit('update:visible', false);
-          this.$emit('visible-change', false);
-        }
-      },
-      updatePopper() {
-        this.broadcast('ElSelectDropdown', 'updatePopper');
-        this.broadcast('ElDropdownMenu', 'updatePopper');
-      }
+    lockScroll: {
+      type: Boolean,
+      default: true
     },
 
-    mounted() {
-      if (this.visible) {
-        this.rendered = true;
-        this.open();
+    closeOnClickModal: {
+      type: Boolean,
+      default: true
+    },
+
+    closeOnPressEscape: {
+      type: Boolean,
+      default: true
+    },
+
+    showClose: {
+      type: Boolean,
+      default: true
+    },
+
+    size: {
+      type: String,
+      default: "small"
+    },
+
+    customClass: {
+      type: String,
+      default: ""
+    },
+
+    top: {
+      type: String,
+      default: "15%"
+    },
+    beforeClose: Function
+  },
+
+  watch: {
+    visible(val) {
+      this.$emit("update:visible", val);
+      if (val) {
+        this.$emit("open");
+        this.$el.addEventListener("scroll", this.updatePopper);
+        this.$nextTick(() => {
+          this.$refs.dialog.scrollTop = 0;
+        });
+      } else {
+        this.$el.removeEventListener("scroll", this.updatePopper);
+        this.$emit("close");
       }
     }
-  };
+  },
+
+  computed: {
+    sizeClass() {
+      return `el-dialog--${this.size}`;
+    },
+    style() {
+      return this.size === "full" ? {} : { top: this.top };
+    }
+  },
+
+  methods: {
+    handleWrapperClick() {
+      if (!this.closeOnClickModal) return;
+      this.handleClose();
+    },
+    handleClose() {
+      if (typeof this.beforeClose === "function") {
+        this.beforeClose(this.hide);
+      } else {
+        this.hide();
+      }
+    },
+    hide(cancel) {
+      if (cancel !== false) {
+        this.$emit("update:visible", false);
+        this.$emit("visible-change", false);
+      }
+    },
+    updatePopper() {
+      this.broadcast("ElSelectDropdown", "updatePopper");
+      this.broadcast("ElDropdownMenu", "updatePopper");
+    }
+  },
+
+  mounted() {
+    if (this.visible) {
+      this.rendered = true;
+      this.open();
+    }
+  }
+};
 </script>
