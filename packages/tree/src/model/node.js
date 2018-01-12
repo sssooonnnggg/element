@@ -52,8 +52,6 @@ export default class Node {
     this.expanded = false;
     this.parent = null;
     this.visible = true;
-    this.hidden = false;
-    this.hiddenSelf = false;
     this.noIndent = false;
     this.isCurrent = false;
 
@@ -93,18 +91,6 @@ export default class Node {
         this.noIndent = true;
       } else {
         this.noIndent = false;
-      }
-
-      if (this.data.hidden) {
-        this.hidden = true;
-      } else {
-        this.hidden = false;
-      }
-
-      if (this.data.hiddenSelf) {
-        this.hiddenSelf = true;
-      } else {
-        this.hiddenSelf = false;
       }
 
       if (this.parent) {
@@ -185,6 +171,23 @@ export default class Node {
     const nodeKey = this.store.key;
     if (this.data) return this.data[nodeKey];
     return null;
+  }
+
+  get hidden() {
+    const data = this.data || {};
+    return data.hidden ? true : false;
+  }
+
+  get hiddenSelf() {
+    const data = this.data || {};
+    return data.hiddenSelf ? true : false;
+  }
+
+  get enable() {
+    const data = this.data || {};
+    if (data.enable == undefined)
+      return true;
+    return data.enable;
   }
 
   insertChild(child, index) {
@@ -336,12 +339,29 @@ export default class Node {
       !this.store.lazy ||
       (this.store.lazy === true && this.loaded === true)
     ) {
+
+      let nodeIsHidden = function(node) {
+        if (!node.hidden) {
+          return false;
+        }
+
+        for (let childNode of node.childNodes) {
+          if (!nodeIsHidden(childNode)) {
+            return false;
+          }
+        }
+
+        return true;
+      };
+
+      this.nodeShouldHidden = nodeIsHidden(this);
+
       let isDescendantHidden = function(data) {
         if (data.childNodes == undefined || data.childNodes.length == 0) {
           return true;
         }
         for (let child of data.childNodes) {
-          if (!child.hidden && !child.hiddenSelf) {
+          if (!child.nodeShouldHidden && !child.hiddenSelf) {
             return false;
           }
           if (child.hiddenSelf && !isDescendantHidden(child)) {

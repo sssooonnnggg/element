@@ -1,6 +1,6 @@
 <template>
   <div class="el-tree-node"
-    v-if="!node.hidden"
+    v-if="!node.nodeShouldHidden"
     @click.stop="handleClick"
     @dblclick.stop="handleDoubleClick"
     @contextmenu.stop.prevent="handleRightClick($event)"
@@ -8,13 +8,15 @@
     :class="{
         'is-expanded': childNodeRendered && expanded,
         'is-current': node.isCurrent,
-        'is-hidden': !node.visible
+        'is-hidden': !node.visible,
+        'el-tree-node-disabled':!node.enable
       }">
-    <div class="el-tree-node__content"
+    <div :class='{"el-tree-node__content": true}'
       :style="{ 'padding-left': indent + 'px' }"
       v-if="!node.hiddenSelf">
       <span class="el-tree-node__expand-icon"
         @click.stop="handleExpandIconClick"
+        @dblclick.stop
         :class="{ 'is-leaf': node.isLeaf, expanded: !node.isLeaf && expanded }">
       </span>
       <el-checkbox v-if="showCheckbox"
@@ -118,8 +120,8 @@ export default {
     }
   },
 
-  computed:{
-    indent(){
+  computed: {
+    indent() {
       return (this.node.indent - 1) * this.tree.indent;
     }
   },
@@ -248,3 +250,9 @@ export default {
   }
 };
 </script>
+<<style>
+.el-tree-node-disabled {
+  opacity : 0.5
+}
+</style>
+

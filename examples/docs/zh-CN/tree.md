@@ -25,10 +25,10 @@
     label: '一级1231313',
     children: [{
       label: '二级 1-1',
-      hiddenSelf:true
     }]
   }, {
-    label: '一级 2',
+    label: '一级 2sfasfas',
+    enable:false,
     children: [{
       label: '二级 2-1',
       children: [{
