@@ -13,7 +13,7 @@
       open2() {
         this.$notify({
           title: '提示',
-          message: '这是一条不会自动关闭的消息',
+          message: '<span style="color:red;">这是一条不会自动关闭的消息</span>',
           duration: 0
         });
       },

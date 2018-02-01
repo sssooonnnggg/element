@@ -341,6 +341,7 @@ export default class Node {
     ) {
 
       let nodeIsHidden = function(node) {
+
         if (!node.hidden) {
           return false;
         }

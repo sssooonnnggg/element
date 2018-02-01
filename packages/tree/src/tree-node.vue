@@ -31,7 +31,7 @@
       <node-content :node="node"></node-content>
     </div>
     <div class="el-tree-node__children"
-      v-if="expanded || node.hiddenSelf">
+      v-show="expanded || node.hiddenSelf">
       <el-tree-node :render-content="renderContent"
         v-for="child in node.childNodes"
         :key="getNodeKey(child)"
