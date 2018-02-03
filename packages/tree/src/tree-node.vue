@@ -1,6 +1,7 @@
 <template>
   <div class="el-tree-node"
     v-if="!node.nodeShouldHidden"
+    :id="node.key"
     @click.stop="handleClick"
     @dblclick.stop="handleDoubleClick"
     @contextmenu.stop.prevent="handleRightClick($event)"

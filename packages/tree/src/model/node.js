@@ -210,7 +210,7 @@ export default class Node {
     }
 
     this.updateLeafState();
-    if (this.hiddenSelf && this.parent) {
+    if (this.parent) {
       this.parent.updateLeafState();
     }
   }
@@ -313,10 +313,10 @@ export default class Node {
 
   expandAll() {
     let expand = function(node) {
-      node.expanded = true;
       node.childNodes.forEach(function(child) {
         expand(child);
       });
+      node.expanded = true;
     };
     expand(this);
   }

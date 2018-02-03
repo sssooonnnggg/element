@@ -194,10 +194,16 @@ export default {
         node.collapse();
       }
     },
-    hideNode(nodeId, hidden) {
+    hideNode(id, hidden) {
       const node = this.store.getNode(id);
       if (node) {
         node.hidden = hidden;
+      }
+    },
+    isVisible(id) {
+      let el = document.getElementById(id);
+      if (el) {
+        return el && el.offsetParent != null;
       }
     }
   },
