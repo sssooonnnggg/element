@@ -47,7 +47,6 @@
   "dependencies": {
     "async-validator": "^1.6.9",
     "babel-helper-vue-jsx-merge-props": "^2.0.0",
-    "body-parser": "file:1.tgz",
     "deepmerge": "^1.2.0",
     "throttle-debounce": "^1.0.1"
   },
