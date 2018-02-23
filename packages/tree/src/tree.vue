@@ -86,7 +86,11 @@ export default {
     indent: {
       type: Number,
       default: 16
-    }
+    },
+    showCombineLine: {
+      type: Boolean,
+      default: true
+    },
   },
 
   computed: {
@@ -166,7 +170,6 @@ export default {
           store.currentNode ? store.currentNode.data : null,
           store.currentNode
         );
-        this.$emit("node-click", node.data, node);
         node.expand(undefined, true);
       }
     },

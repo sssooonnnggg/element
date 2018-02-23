@@ -28,11 +28,22 @@
     }]
   }, {
     label: '一级 2sfasfas',
-    enable:false,
     children: [{
       label: '二级 2-1',
+      hiddenSelf:true,
       children: [{
-        label: '三级 2-1-1'
+        label: '三级 1',
+        children:[{
+          label: 'jljljl'
+        },{
+          label: 'aaaaaa'
+        }]
+      },{
+        label: '二级 2'
+      },{
+        label: '二级 3'
+      },{
+        label: '二级 4'
       }]
     }, {
       label: '二级 2-2',
@@ -231,10 +242,11 @@
 ::: demo
 
 ```html
-<el-tree :data="data" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
+<el-tree :data="data" :showCombineLine="false" :props="defaultProps" @node-click="handleNodeClick" :indent='40'></el-tree>
 
 <script>
   export default {
+    
     data() {
       return {
         data: [{
@@ -280,7 +292,6 @@
     },
     methods: {
       handleNodeClick(data) {
-        console.log(data);
       }
     }
   };

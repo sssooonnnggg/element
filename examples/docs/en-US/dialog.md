@@ -87,6 +87,8 @@ Dialog pops up a dialog box, and it's quite customizable.
   title="Tips"
   :visible.sync="dialogVisible"
   size="tiny"
+  :top='800'
+  :left='0'
   :before-close="handleClose">
   <span>This is a message</span>
   <span slot="footer" class="dialog-footer">

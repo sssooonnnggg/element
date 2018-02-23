@@ -183,6 +183,16 @@ export default class Node {
     return data.hiddenSelf ? true : false;
   }
 
+  get hideCombineLine() {
+    const data = this.data || {};
+    return data.hideCombineLine ? true : false;
+  }
+
+  get combineLineColor() {
+    const data = this.data || {};
+    return data.combineLineColor ? data.combineLineColor : 'transparent';
+  }
+
   get enable() {
     const data = this.data || {};
     if (data.enable == undefined)

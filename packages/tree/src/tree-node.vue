@@ -10,7 +10,8 @@
         'is-expanded': childNodeRendered && expanded,
         'is-current': node.isCurrent,
         'is-hidden': !node.visible,
-        'el-tree-node-disabled':!node.enable
+        'el-tree-node-disabled':!node.enable,
+        'node-combine-line-container':shouldShowCombineLine
       }">
     <div :class='{"el-tree-node__content": true}'
       :style="{ 'padding-left': indent + 'px' }"
@@ -31,6 +32,8 @@
       </span>
       <node-content :node="node"></node-content>
     </div>
+    <div class='node-combine-line' v-if='shouldShowCombineLine' 
+      :style="{ 'margin-left': combineLineIndent + 'px', 'border-color':node.combineLineColor }"></div>
     <div class="el-tree-node__children"
       v-show="expanded || node.hiddenSelf">
       <el-tree-node :render-content="renderContent"
@@ -99,6 +102,7 @@ export default {
       expanded: false,
       childNodeRendered: false,
       showCheckbox: false,
+      showCombineLine: false,
       oldChecked: null,
       oldIndeterminate: null
     };
@@ -124,6 +128,27 @@ export default {
   computed: {
     indent() {
       return (this.node.indent - 1) * this.tree.indent;
+    },
+    combineLineIndent() {
+      let indent = this.node.hiddenSelf ? this.node.indent : this.node.indent - 1;
+      return indent * this.tree.indent;
+    },
+    shouldShowCombineLine() {
+
+      if (!this.showCombineLine || this.node.hideCombineLine) {
+        return false;
+      }
+
+      if (this.node.hiddenSelf && !this.node.noIndent && this.node.childNodes.length > 1) {
+        return true;
+      }
+
+      let node = this.node;
+      if (node.childNodes.find(child => child.noIndent && !child.hiddenSelf) && this.expanded) {
+        return true;
+      }
+
+      return false;
     }
   },
 
@@ -235,6 +260,7 @@ export default {
     });
 
     this.showCheckbox = tree.showCheckbox;
+    this.showCombineLine = tree.showCombineLine;
 
     if (this.node.expanded) {
       this.expanded = true;
@@ -253,7 +279,17 @@ export default {
 </script>
 <<style>
 .el-tree-node-disabled {
-  opacity : 0.5
+  opacity: 0.5;
+}
+.node-combine-line-container {
+  position: relative;
+}
+.node-combine-line {
+  border: 3px solid black;
+  border-right-width: 0px;
+  top: 15px;
+  width: 10px;
+  bottom: 15px;
+  position: absolute;
 }
 </style>
-

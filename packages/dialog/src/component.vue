@@ -1,10 +1,12 @@
 <template>
-    <div class="el-dialog__wrapper" tabindex="-1" v-show="visible" @click.self="handleWrapperClick">
+    <div class="el-dialog__wrapper" tabindex="-1" v-show="visible" @click="handleWrapperClick" @mousemove="handleMouseMove">
       <div
         class="el-dialog"
         :class="[sizeClass, customClass]"
         ref="dialog"
-        :style="style">
+        :style="style"
+        @mousedown="handleMouseDown"
+        @mouseup="handleMouseUp">
         <div class="el-dialog__header">
           <slot name="title">
             <span class="el-dialog__title">{{title}}</span>
@@ -77,11 +79,29 @@ export default {
       default: ""
     },
 
-    top: {
-      type: String,
-      default: "15%"
-    },
+    top: {},
+    left: {},
     beforeClose: Function
+  },
+
+  data() {
+    return {
+      l: 0,
+      t: 0
+    };
+  },
+
+  created() {
+    this.t = this.top || 200;
+    this.l = this.left || -1;
+  },
+
+  mounted() {
+    if (this.visible) {
+      this.rendered = true;
+      this.open();
+      this.centerDialog();
+    }
   },
 
   watch: {
@@ -92,6 +112,7 @@ export default {
         this.$el.addEventListener("scroll", this.updatePopper);
         this.$nextTick(() => {
           this.$refs.dialog.scrollTop = 0;
+          this.centerDialog();
         });
       } else {
         this.$el.removeEventListener("scroll", this.updatePopper);
@@ -105,14 +126,33 @@ export default {
       return `el-dialog--${this.size}`;
     },
     style() {
-      return this.size === "full" ? {} : { top: this.top };
+      return {
+        top: this.realTop,
+        left: this.realLeft
+      };
+    },
+    realTop() {
+      return this.t + "px";
+    },
+    realLeft() {
+      return typeof this.l == "string" ? this.l : this.l + "px";
     }
   },
 
   methods: {
+    centerDialog() {
+      let dialog = this.$refs.dialog;
+      let parent = document.documentElement;
+
+      if (!this.left) {
+        this.l = (parent.offsetWidth - dialog.offsetWidth) / 2;
+      }
+    },
     handleWrapperClick() {
-      if (!this.closeOnClickModal) return;
-      this.handleClose();
+      // if (!this.closeOnClickModal) return;
+      // this.handleClose();
+
+      this.$emit("wrapper-clicked");
     },
     handleClose() {
       if (typeof this.beforeClose === "function") {
@@ -120,6 +160,29 @@ export default {
       } else {
         this.hide();
       }
+    },
+    move(x, y) {
+      this.l += x;
+      this.t += y;
+
+      this.updateBounding();
+    },
+    updateBounding() {
+      let dialog = this.$refs.dialog;
+      let parent = document.documentElement;
+      let dialogWidth = dialog.offsetWidth;
+      let dialogHeight = dialog.offsetHeight;
+
+      this.l = this.l < 0 ? 0 : this.l;
+      this.t = this.t < 0 ? 0 : this.t;
+      this.l =
+        this.l + dialogWidth > parent.offsetWidth
+          ? parent.offsetWidth - dialogWidth
+          : this.l;
+      this.t =
+        this.t + dialogHeight > parent.offsetHeight
+          ? parent.offsetHeight - dialogHeight
+          : this.t;
     },
     hide(cancel) {
       if (cancel !== false) {
@@ -130,13 +193,35 @@ export default {
     updatePopper() {
       this.broadcast("ElSelectDropdown", "updatePopper");
       this.broadcast("ElDropdownMenu", "updatePopper");
-    }
-  },
+    },
+    handleMouseDown(e) {
+      this.dragging = true;
+      this.dragPos = {
+        x: e.clientX,
+        y: e.clientY
+      };
+      this.oldPos = {
+        l: this.l,
+        t: this.t
+      };
+    },
+    handleMouseMove(e) {
+      if (!this.dragging) {
+        return;
+      }
 
-  mounted() {
-    if (this.visible) {
-      this.rendered = true;
-      this.open();
+      let delta = {
+        x: e.clientX - this.dragPos.x,
+        y: e.clientY - this.dragPos.y
+      };
+
+      this.l = this.oldPos.l + delta.x;
+      this.t = this.oldPos.t + delta.y;
+
+      this.updateBounding();
+    },
+    handleMouseUp(e) {
+      this.dragging = false;
     }
   }
 };
