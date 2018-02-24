@@ -325,7 +325,7 @@ export default {
 
   beforeDestroy() {
     if (this.draggable) {
-      this.drake.destory();
+      this.drake.destroy();
     }
   }
 };

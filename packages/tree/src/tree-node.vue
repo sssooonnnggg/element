@@ -114,43 +114,19 @@ export default {
   },
 
   mounted() {
-    // if (!this.draggable) {
-    //   return;
-    // }
 
-    // let tree = this.getTree();
-    // tree.drake.containers.push(this.$refs.content);
   },
 
   beforeDestroy() {
-    // if (!this.draggable) {
-    //   return;
-    // }
 
-    // let tree = this.getTree();
-    // let containers = tree.drake.containers;
-    // let index = containers.find(conatainer => conatainer == this.$refs.content);
-    // containers.splice(index, 1);
   },
 
   beforeUpdate() {
-    // if (!this.draggable) {
-    //   return;
-    // }
 
-    // let tree = this.getTree();
-    // let containers = tree.drake.containers;
-    // let index = containers.find(conatainer => conatainer == this.$refs.content);
-    //containers.splice(index, 1);
   },
 
   updated() {
-    // if (!this.draggable) {
-    //   return;
-    // }
 
-    // let tree = this.getTree();
-    //tree.drake.containers.push(this.$refs.content);
   },
 
   watch: {
