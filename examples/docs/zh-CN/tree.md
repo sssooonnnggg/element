@@ -242,7 +242,7 @@
 ::: demo
 
 ```html
-<el-tree :data="data" :showCombineLine="false" :props="defaultProps" @node-click="handleNodeClick" :indent='40'></el-tree>
+<el-tree :data="data" node-key="label" :draggable="true" :props="defaultProps" @node-click="handleNodeClick" :indent='40'></el-tree>
 
 <script>
   export default {

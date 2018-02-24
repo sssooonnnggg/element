@@ -19,6 +19,7 @@
 import TreeStore from "./model/tree-store";
 import { t } from "element-ui/src/locale";
 import emitter from "element-ui/src/mixins/emitter";
+import Dragula from "dragula";
 
 export default {
   name: "ElTree",
@@ -33,7 +34,8 @@ export default {
     return {
       store: null,
       root: null,
-      currentNode: null
+      currentNode: null,
+      drake: {}
     };
   },
 
@@ -91,7 +93,13 @@ export default {
       type: Boolean,
       default: true
     },
+    draggable: {
+      type: Boolean,
+      default: false
+    }
   },
+
+  mounted() {},
 
   computed: {
     children: {
@@ -212,6 +220,73 @@ export default {
   },
 
   created() {
+    this.drake = Dragula({
+      copy: true,
+      accepts: function(el, target, source, sibling) {
+        return true;
+      }
+    });
+
+    this.drake.on('drop', (el, target, source, sibling) => {
+
+      if (!target) {
+        return;
+      }
+
+      let nodeId = target.children[0].id;
+      if (!sibling) {
+        this.$emit('insert-after', nodeId);
+      } else {
+        this.$emit('insert-before', nodeId);
+      }
+
+    });
+
+    this.drake.on('shadow', (el, dropTarget, _source) => {
+
+      let findParent = (item) => {
+        let parentNode = item.parentNode;
+        if (!parentNode) {
+          return null;
+        } else {
+          if (parentNode.className 
+           && parentNode.className.match(/el-tree-node$|el-tree-node\s/g)){
+            return parentNode;
+          }
+          return findParent(parentNode);
+        }
+      }
+
+      let parentNode = findParent(dropTarget);
+      let indent;
+      if (!parentNode) {
+        indent = 0;
+      } else {
+        const node = this.store.getNode(parentNode.id);
+        indent = node.indent;
+      }
+
+      let fixedPadding = this.indent * indent;
+      let actualPadding = parseInt(el.children[0].style.paddingLeft);
+      let extraPadding = fixedPadding - actualPadding;
+      let addPadding = (item) => {
+        if (item.className.match(/el-tree-node__content$|el-tree-node__content\s/g)) {
+          let originPadding = parseInt(item.style.paddingLeft);
+          item.style.paddingLeft = (originPadding + extraPadding) + 'px';
+        }
+
+        if (!item.children) {
+          return;
+        }
+
+        for (let child of item.children) {
+          addPadding(child);
+        }
+      }
+
+      addPadding(el);
+    })
+
     this.isTree = true;
 
     this.store = new TreeStore({

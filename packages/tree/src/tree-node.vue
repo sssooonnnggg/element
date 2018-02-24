@@ -1,47 +1,50 @@
 <template>
-  <div class="el-tree-node"
-    v-if="!node.nodeShouldHidden"
-    :id="node.key"
-    @click.stop="handleClick"
-    @dblclick.stop="handleDoubleClick"
-    @contextmenu.stop.prevent="handleRightClick($event)"
-    v-show="node.visible"
-    :class="{
+  <div ref="content">
+    <div class="el-tree-node"
+      v-if="!node.nodeShouldHidden"
+      :id="node.key"
+      @click.stop="handleClick"
+      @dblclick.stop="handleDoubleClick"
+      @contextmenu.stop.prevent="handleRightClick($event)"
+      v-show="node.visible"
+      :class="{
         'is-expanded': childNodeRendered && expanded,
         'is-current': node.isCurrent,
         'is-hidden': !node.visible,
         'el-tree-node-disabled':!node.enable,
         'node-combine-line-container':shouldShowCombineLine
       }">
-    <div :class='{"el-tree-node__content": true}'
-      :style="{ 'padding-left': indent + 'px' }"
-      v-if="!node.hiddenSelf">
-      <span class="el-tree-node__expand-icon"
-        @click.stop="handleExpandIconClick"
-        @dblclick.stop
-        :class="{ 'is-leaf': node.isLeaf, expanded: !node.isLeaf && expanded }">
-      </span>
-      <el-checkbox v-if="showCheckbox"
-        v-model="node.checked"
-        :indeterminate="node.indeterminate"
-        @change="handleCheckChange"
-        @click.native.stop="handleUserClick">
-      </el-checkbox>
-      <span v-if="node.loading"
-        class="el-tree-node__loading-icon el-icon-loading">
-      </span>
-      <node-content :node="node"></node-content>
-    </div>
-    <div class='node-combine-line' v-if='shouldShowCombineLine' 
-      :style="{ 'margin-left': combineLineIndent + 'px', 'border-color':node.combineLineColor }"></div>
-    <div class="el-tree-node__children"
-      v-show="expanded || node.hiddenSelf">
-      <el-tree-node :render-content="renderContent"
-        v-for="child in node.childNodes"
-        :key="getNodeKey(child)"
-        :node="child"
-        @node-expand="handleChildNodeExpand">
-      </el-tree-node>
+      <div :class='{"el-tree-node__content": true}'
+        :style="{ 'padding-left': indent + 'px' }"
+        v-if="!node.hiddenSelf">
+        <span class="el-tree-node__expand-icon"
+          @click.stop="handleExpandIconClick"
+          @dblclick.stop
+          :class="{ 'is-leaf': node.isLeaf, expanded: !node.isLeaf && expanded }">
+        </span>
+        <el-checkbox v-if="showCheckbox"
+          v-model="node.checked"
+          :indeterminate="node.indeterminate"
+          @change="handleCheckChange"
+          @click.native.stop="handleUserClick">
+        </el-checkbox>
+        <span v-if="node.loading"
+          class="el-tree-node__loading-icon el-icon-loading">
+        </span>
+        <node-content :node="node"></node-content>
+      </div>
+      <div class='node-combine-line'
+        v-if='shouldShowCombineLine'
+        :style="{ 'margin-left': combineLineIndent + 'px', 'border-color':node.combineLineColor }"></div>
+      <div class="el-tree-node__children"
+        v-show="expanded || node.hiddenSelf">
+        <el-tree-node :render-content="renderContent"
+          v-for="child in node.childNodes"
+          :key="getNodeKey(child)"
+          :node="child"
+          @node-expand="handleChildNodeExpand">
+        </el-tree-node>
+      </div>
     </div>
   </div>
 </template>
@@ -50,6 +53,8 @@
 import ElCollapseTransition from "element-ui/src/transitions/collapse-transition";
 import ElCheckbox from "element-ui/packages/checkbox";
 import emitter from "element-ui/src/mixins/emitter";
+import Dragula from "dragula";
+import "dragula/dist/dragula.css";
 
 export default {
   name: "ElTreeNode",
@@ -108,6 +113,42 @@ export default {
     };
   },
 
+  mounted() {
+    if (!this.draggable) {
+      return;
+    }
+
+    const parent = this.$parent;
+
+    if (parent.isTree) {
+      this.tree = parent;
+    } else {
+      this.tree = parent.tree;
+    }
+
+    const tree = this.tree;
+    tree.drake.containers.push(this.$refs.content);
+  },
+
+  beforeDestroy() {
+    if (!this.draggable) {
+      return;
+    }
+
+    const parent = this.$parent;
+
+    if (parent.isTree) {
+      this.tree = parent;
+    } else {
+      this.tree = parent.tree;
+    }
+
+    const tree = this.tree;
+    let containers = tree.drake.containers;
+    let index = containers.find(conatainer => conatainer == this.$refs.content);
+    containers.splice(index, 1);
+  },
+
   watch: {
     "node.indeterminate"(val) {
       this.handleSelectChange(this.node.checked, val);
@@ -130,21 +171,29 @@ export default {
       return (this.node.indent - 1) * this.tree.indent;
     },
     combineLineIndent() {
-      let indent = this.node.hiddenSelf ? this.node.indent : this.node.indent - 1;
+      let indent = this.node.hiddenSelf
+        ? this.node.indent
+        : this.node.indent - 1;
       return indent * this.tree.indent;
     },
     shouldShowCombineLine() {
-
       if (!this.showCombineLine || this.node.hideCombineLine) {
         return false;
       }
 
-      if (this.node.hiddenSelf && !this.node.noIndent && this.node.childNodes.length > 1) {
+      if (
+        this.node.hiddenSelf &&
+        !this.node.noIndent &&
+        this.node.childNodes.length > 1
+      ) {
         return true;
       }
 
       let node = this.node;
-      if (node.childNodes.find(child => child.noIndent && !child.hiddenSelf) && this.expanded) {
+      if (
+        node.childNodes.find(child => child.noIndent && !child.hiddenSelf) &&
+        this.expanded
+      ) {
         return true;
       }
 
@@ -261,6 +310,7 @@ export default {
 
     this.showCheckbox = tree.showCheckbox;
     this.showCombineLine = tree.showCombineLine;
+    this.draggable = tree.draggable;
 
     if (this.node.expanded) {
       this.expanded = true;
