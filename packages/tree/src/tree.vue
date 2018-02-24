@@ -1,5 +1,6 @@
 <template>
   <div class="el-tree"
+    ref='container'
     :class="{ 'el-tree--highlight-current': highlightCurrent }">
     <el-tree-node v-for="child in root.childNodes"
       :node="child"
@@ -220,73 +221,6 @@ export default {
   },
 
   created() {
-    this.drake = Dragula({
-      copy: true,
-      accepts: function(el, target, source, sibling) {
-        return true;
-      }
-    });
-
-    this.drake.on('drop', (el, target, source, sibling) => {
-
-      if (!target) {
-        return;
-      }
-
-      let nodeId = target.children[0].id;
-      if (!sibling) {
-        this.$emit('insert-after', nodeId);
-      } else {
-        this.$emit('insert-before', nodeId);
-      }
-
-    });
-
-    this.drake.on('shadow', (el, dropTarget, _source) => {
-
-      let findParent = (item) => {
-        let parentNode = item.parentNode;
-        if (!parentNode) {
-          return null;
-        } else {
-          if (parentNode.className 
-           && parentNode.className.match(/el-tree-node$|el-tree-node\s/g)){
-            return parentNode;
-          }
-          return findParent(parentNode);
-        }
-      }
-
-      let parentNode = findParent(dropTarget);
-      let indent;
-      if (!parentNode) {
-        indent = 0;
-      } else {
-        const node = this.store.getNode(parentNode.id);
-        indent = node.indent;
-      }
-
-      let fixedPadding = this.indent * indent;
-      let actualPadding = parseInt(el.children[0].style.paddingLeft);
-      let extraPadding = fixedPadding - actualPadding;
-      let addPadding = (item) => {
-        if (item.className.match(/el-tree-node__content$|el-tree-node__content\s/g)) {
-          let originPadding = parseInt(item.style.paddingLeft);
-          item.style.paddingLeft = (originPadding + extraPadding) + 'px';
-        }
-
-        if (!item.children) {
-          return;
-        }
-
-        for (let child of item.children) {
-          addPadding(child);
-        }
-      }
-
-      addPadding(el);
-    })
-
     this.isTree = true;
 
     this.store = new TreeStore({
@@ -305,6 +239,94 @@ export default {
     });
 
     this.root = this.store.root;
+  },
+
+  mounted() {
+    if (this.draggable) {
+      this.drake = Dragula({
+        copy: true,
+        mirrorContainer: this.$refs.tree,
+        accepts: function(el, target, source, sibling) {
+          return true;
+        },
+        isContainer: function(el) {
+          return el.className == "drag-content";
+        }
+      });
+
+      this.drake.on("drop", (el, target, source, sibling) => {
+        if (!target) {
+          return;
+        }
+
+        let nodeId = target.children[0].id;
+        let siblingNode = this.store.getNode(nodeId);
+        let node = this.store.getNode(el.id);
+
+        if (!sibling) {
+          this.$emit("node-insert-after", node.data, siblingNode.data);
+        } else {
+          this.$emit("node-insert-before", node.data, siblingNode.data);
+        }
+      });
+
+      // 拖放时虚节点的缩进处理
+      this.drake.on("shadow", (el, dropTarget, _source) => {
+        let findParent = item => {
+          let parentNode = item.parentNode;
+          if (!parentNode) {
+            return null;
+          } else {
+            if (
+              parentNode.className &&
+              parentNode.className.match(/el-tree-node$|el-tree-node\s/g)
+            ) {
+              return parentNode;
+            }
+            return findParent(parentNode);
+          }
+        };
+
+        let parentNode = findParent(dropTarget);
+        let indent;
+        if (!parentNode) {
+          indent = 0;
+        } else {
+          const node = this.store.getNode(parentNode.id);
+          indent = node.indent;
+        }
+
+        let fixedPadding = this.indent * indent;
+        let actualPadding = parseInt(el.children[0].style.paddingLeft);
+        let extraPadding = fixedPadding - actualPadding;
+        let addPadding = item => {
+          if (
+            item.className.match(
+              /el-tree-node__content$|el-tree-node__content\s/g
+            )
+          ) {
+            let originPadding = parseInt(item.style.paddingLeft);
+            item.style.paddingLeft = originPadding + extraPadding + "px";
+          }
+
+          if (!item.children) {
+            return;
+          }
+
+          for (let i = 0; i < item.children.length; ++i) {
+            addPadding(item.children[i]);
+          }
+        };
+
+        addPadding(el);
+      });
+    }
+  },
+
+  beforeDestroy() {
+    if (this.draggable) {
+      this.drake.destory();
+    }
   }
 };
 </script>

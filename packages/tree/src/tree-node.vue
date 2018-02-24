@@ -1,5 +1,5 @@
 <template>
-  <div ref="content">
+  <div class="drag-content">
     <div class="el-tree-node"
       v-if="!node.nodeShouldHidden"
       :id="node.key"
@@ -114,39 +114,43 @@ export default {
   },
 
   mounted() {
-    if (!this.draggable) {
-      return;
-    }
+    // if (!this.draggable) {
+    //   return;
+    // }
 
-    const parent = this.$parent;
-
-    if (parent.isTree) {
-      this.tree = parent;
-    } else {
-      this.tree = parent.tree;
-    }
-
-    const tree = this.tree;
-    tree.drake.containers.push(this.$refs.content);
+    // let tree = this.getTree();
+    // tree.drake.containers.push(this.$refs.content);
   },
 
   beforeDestroy() {
-    if (!this.draggable) {
-      return;
-    }
+    // if (!this.draggable) {
+    //   return;
+    // }
 
-    const parent = this.$parent;
+    // let tree = this.getTree();
+    // let containers = tree.drake.containers;
+    // let index = containers.find(conatainer => conatainer == this.$refs.content);
+    // containers.splice(index, 1);
+  },
 
-    if (parent.isTree) {
-      this.tree = parent;
-    } else {
-      this.tree = parent.tree;
-    }
+  beforeUpdate() {
+    // if (!this.draggable) {
+    //   return;
+    // }
 
-    const tree = this.tree;
-    let containers = tree.drake.containers;
-    let index = containers.find(conatainer => conatainer == this.$refs.content);
-    containers.splice(index, 1);
+    // let tree = this.getTree();
+    // let containers = tree.drake.containers;
+    // let index = containers.find(conatainer => conatainer == this.$refs.content);
+    //containers.splice(index, 1);
+  },
+
+  updated() {
+    // if (!this.draggable) {
+    //   return;
+    // }
+
+    // let tree = this.getTree();
+    //tree.drake.containers.push(this.$refs.content);
   },
 
   watch: {
@@ -202,6 +206,9 @@ export default {
   },
 
   methods: {
+    getTree() {
+      return this.tree;
+    },
     getNodeKey(node, index) {
       const nodeKey = this.tree.nodeKey;
       if (nodeKey && node) {
