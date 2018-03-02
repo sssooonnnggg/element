@@ -218,6 +218,10 @@
 
     data() {
       return {
+        isDragValid: (data) => {
+          console.log(data);
+          return true;
+        },
         data,
         data2,
         regions,
@@ -242,13 +246,17 @@
 ::: demo
 
 ```html
-<el-tree :data="data" node-key="label" :draggable="true" :props="defaultProps" @node-click="handleNodeClick" :indent='40'></el-tree>
+<el-tree :data="data" node-key="label" :draggable="true" :props="defaultProps" @node-click="handleNodeClick" :indent='40' :is-drag-valid="isDragValid"></el-tree>
 
 <script>
   export default {
     
     data() {
       return {
+        isDragValid: (data) => {
+          console.log(data);
+          return true;
+        },
         data: [{
           label: '一级 1',
           children: [{

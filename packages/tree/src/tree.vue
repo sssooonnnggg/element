@@ -21,6 +21,7 @@ import TreeStore from "./model/tree-store";
 import { t } from "element-ui/src/locale";
 import emitter from "element-ui/src/mixins/emitter";
 import Dragula from "dragula";
+import DragulaInstance from "./model/dragula-instance";
 
 export default {
   name: "ElTree",
@@ -97,6 +98,16 @@ export default {
     draggable: {
       type: Boolean,
       default: false
+    },
+    isActive: {
+      type: Boolean,
+      default: true
+    },
+    isDragValid: {
+      default: null
+    },
+    isDropValid: {
+      default: null
     }
   },
 
@@ -128,6 +139,14 @@ export default {
     },
     data(newVal) {
       this.store.setData(newVal);
+    },
+    isActive(newVal) {
+      if (newVal) {
+        if (this.draggable) {
+          this.drake.removeEventListener();
+          this.drake.addEventListener(this);
+        }
+      }
     }
   },
 
@@ -217,6 +236,24 @@ export default {
       if (el) {
         return el && el.offsetParent != null;
       }
+    },
+    isDragValidImpl(node) {
+      if (!this.draggable || !this.isDragValid) {
+        return false;
+      }
+
+      return this.isDragValid(node.data);
+    },
+    isDropValidImpl(node, target) {
+      if (!this.draggable) {
+        return false;
+      }
+
+      if (!this.isDropValid) {
+        return true;
+      }
+
+      return this.isDropValid(node.data, target.data);
     }
   },
 
@@ -243,90 +280,17 @@ export default {
 
   mounted() {
     if (this.draggable) {
-      this.drake = Dragula({
-        copy: true,
-        mirrorContainer: this.$refs.tree,
-        accepts: function(el, target, source, sibling) {
-          return true;
-        },
-        isContainer: function(el) {
-          return el.className == "drag-content";
-        }
-      });
+      this.drake = DragulaInstance;
 
-      this.drake.on("drop", (el, target, source, sibling) => {
-        if (!target) {
-          return;
-        }
-
-        let nodeId = target.children[0].id;
-        let siblingNode = this.store.getNode(nodeId);
-        let node = this.store.getNode(el.id);
-
-        if (!sibling) {
-          this.$emit("node-insert-after", node.data, siblingNode.data);
-        } else {
-          this.$emit("node-insert-before", node.data, siblingNode.data);
-        }
-      });
-
-      // 拖放时虚节点的缩进处理
-      this.drake.on("shadow", (el, dropTarget, _source) => {
-        let findParent = item => {
-          let parentNode = item.parentNode;
-          if (!parentNode) {
-            return null;
-          } else {
-            if (
-              parentNode.className &&
-              parentNode.className.match(/el-tree-node$|el-tree-node\s/g)
-            ) {
-              return parentNode;
-            }
-            return findParent(parentNode);
-          }
-        };
-
-        let parentNode = findParent(dropTarget);
-        let indent;
-        if (!parentNode) {
-          indent = 0;
-        } else {
-          const node = this.store.getNode(parentNode.id);
-          indent = node.indent;
-        }
-
-        let fixedPadding = this.indent * indent;
-        let actualPadding = parseInt(el.children[0].style.paddingLeft);
-        let extraPadding = fixedPadding - actualPadding;
-        let addPadding = item => {
-          if (
-            item.className.match(
-              /el-tree-node__content$|el-tree-node__content\s/g
-            )
-          ) {
-            let originPadding = parseInt(item.style.paddingLeft);
-            item.style.paddingLeft = originPadding + extraPadding + "px";
-          }
-
-          if (!item.children) {
-            return;
-          }
-
-          for (let i = 0; i < item.children.length; ++i) {
-            addPadding(item.children[i]);
-          }
-        };
-
-        addPadding(el);
-      });
+      if (this.isActive) {
+        this.drake.removeEventListener();
+        this.drake.addEventListener(this);
+      }
     }
   },
 
   beforeDestroy() {
-    if (this.draggable) {
-      this.drake.destroy();
-    }
+
   }
 };
 </script>
