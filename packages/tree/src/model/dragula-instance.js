@@ -76,8 +76,7 @@ class DragulaWrapper {
         return;
       }
 
-
-      if (!sibling || !this.tree.shouldShowShadowItemImpl(this.tree.store.getNode(sibling.id))) {
+      if (sibling && !this.tree.shouldShowShadowItemImpl(this.tree.store.getNode(sibling.id))) {
         el.style.display = 'none';
       } 
 
