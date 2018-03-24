@@ -108,6 +108,9 @@ export default {
     },
     isDropValid: {
       default: null
+    },
+    shouldShowShadowItem: {
+      default: null
     }
   },
 
@@ -254,6 +257,17 @@ export default {
       }
 
       return this.isDropValid(node.data, target.data);
+    },
+    shouldShowShadowItemImpl(node) {
+      if (!this.draggable) {
+        return false;
+      }
+
+      if (!this.shouldShowShadowItem) {
+        return true;
+      }
+
+      return this.shouldShowShadowItem(node.data);
     }
   },
 
@@ -289,8 +303,6 @@ export default {
     }
   },
 
-  beforeDestroy() {
-
-  }
+  beforeDestroy() {}
 };
 </script>

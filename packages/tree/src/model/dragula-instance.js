@@ -69,11 +69,17 @@ class DragulaWrapper {
       }
     });
 
-    // 拖放时虚节点的缩进处理
-    this.drake.on("shadow", (el, dropTarget, _source) => {
+    // 拖放时虚节点的缩进处理一级是否显示
+    this.drake.on("shadow", (el, dropTarget, _source, sibling) => {
+
       if (!this.tree) {
         return;
       }
+
+
+      if (!sibling || !this.tree.shouldShowShadowItemImpl(this.tree.store.getNode(sibling.id))) {
+        el.style.display = 'none';
+      } 
 
       let findParent = item => {
         let parentNode = item.parentNode;
