@@ -310,7 +310,7 @@ export default {
         position: "fixed",
         display: "none",
         width: "300px",
-        height: "3px",
+        height: "2px",
         background: "red"
       });
     },
