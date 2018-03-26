@@ -266,6 +266,9 @@ export default {
         this.addIndicator();
       }
       let dropTarget = this.getItemUnderCursor(x, y);
+      if (!this.tree.$refs.container.contains(dropTarget)) {
+        dropTarget = null;
+      }
       if (dropTarget) {
         let node = this.node.store.getNode(dropTarget.id);
         if (node) {
@@ -287,7 +290,9 @@ export default {
           this.updateIndicatorPos(x, y);
 
           let node = this.node.store.getNode(dropTarget.id);
-          this.shouldShowIndicator = this.tree.shouldShowDragIndicatorImpl(node);
+          this.shouldShowIndicator = this.tree.shouldShowDragIndicatorImpl(
+            node
+          );
         } else {
           this.lastDropTarget = null;
           this.hideIndicator();
@@ -345,9 +350,13 @@ export default {
       let middle = (y2 + y1) / 2;
 
       let left = this.lastDropTargetRect.left;
-      let contentPadding = parseInt(
-        this.lastDropTarget.firstChild.style.paddingLeft
-      );
+      let firstChildStyle = this.lastDropTarget.firstChild.style;
+      let contentPadding = 0;
+      if (firstChildStyle) {
+        contentPadding = parseInt(
+          this.lastDropTarget.firstChild.style.paddingLeft
+        );
+      }
       if (y < middle) {
         this.updateIndicator(left + contentPadding, y1);
         this.draggingInsertPos = "node-insert-before";
