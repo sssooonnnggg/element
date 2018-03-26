@@ -1,50 +1,50 @@
 <template>
-  <div class="drag-content">
-    <div class="el-tree-node"
-      v-if="!node.nodeShouldHidden"
-      :id="node.key"
-      @click.stop="handleClick"
-      @dblclick.stop="handleDoubleClick"
-      @contextmenu.stop.prevent="handleRightClick($event)"
-      v-show="node.visible"
-      :class="{
+  <div class="el-tree-node"
+    v-if="!node.nodeShouldHidden"
+    :id="node.key"
+    ref="node"
+    @mousedown.stop="handleMouseDown"
+    @click.stop="handleClick"
+    @dblclick.stop="handleDoubleClick"
+    @contextmenu.stop.prevent="handleRightClick($event)"
+    v-show="node.visible"
+    :class="{
         'is-expanded': childNodeRendered && expanded,
         'is-current': node.isCurrent,
         'is-hidden': !node.visible,
         'el-tree-node-disabled':!node.enable,
         'node-combine-line-container':shouldShowCombineLine
       }">
-      <div :class='{"el-tree-node__content": true}'
-        :style="{ 'padding-left': indent + 'px' }"
-        v-if="!node.hiddenSelf">
-        <span class="el-tree-node__expand-icon"
-          @click.stop="handleExpandIconClick"
-          @dblclick.stop
-          :class="{ 'is-leaf': node.isLeaf, expanded: !node.isLeaf && expanded }">
-        </span>
-        <el-checkbox v-if="showCheckbox"
-          v-model="node.checked"
-          :indeterminate="node.indeterminate"
-          @change="handleCheckChange"
-          @click.native.stop="handleUserClick">
-        </el-checkbox>
-        <span v-if="node.loading"
-          class="el-tree-node__loading-icon el-icon-loading">
-        </span>
-        <node-content :node="node"></node-content>
-      </div>
-      <div class='node-combine-line'
-        v-if='shouldShowCombineLine'
-        :style="{ 'margin-left': combineLineIndent + 'px', 'border-color':node.combineLineColor }"></div>
-      <div class="el-tree-node__children"
-        v-show="expanded || node.hiddenSelf">
-        <el-tree-node :render-content="renderContent"
-          v-for="child in node.childNodes"
-          :key="getNodeKey(child)"
-          :node="child"
-          @node-expand="handleChildNodeExpand">
-        </el-tree-node>
-      </div>
+    <div :class='{"el-tree-node__content": true}'
+      :style="{ 'padding-left': indent + 'px' }"
+      v-if="!node.hiddenSelf">
+      <span class="el-tree-node__expand-icon"
+        @click.stop="handleExpandIconClick"
+        @dblclick.stop
+        :class="{ 'is-leaf': node.isLeaf, expanded: !node.isLeaf && expanded }">
+      </span>
+      <el-checkbox v-if="showCheckbox"
+        v-model="node.checked"
+        :indeterminate="node.indeterminate"
+        @change="handleCheckChange"
+        @click.native.stop="handleUserClick">
+      </el-checkbox>
+      <span v-if="node.loading"
+        class="el-tree-node__loading-icon el-icon-loading">
+      </span>
+      <node-content :node="node"></node-content>
+    </div>
+    <div class='node-combine-line'
+      v-if='shouldShowCombineLine'
+      :style="{ 'margin-left': combineLineIndent + 'px', 'border-color':node.combineLineColor }"></div>
+    <div class="el-tree-node__children"
+      v-show="expanded || node.hiddenSelf">
+      <el-tree-node :render-content="renderContent"
+        v-for="child in node.childNodes"
+        :key="getNodeKey(child)"
+        :node="child"
+        @node-expand="handleChildNodeExpand">
+      </el-tree-node>
     </div>
   </div>
 </template>
@@ -53,8 +53,6 @@
 import ElCollapseTransition from "element-ui/src/transitions/collapse-transition";
 import ElCheckbox from "element-ui/packages/checkbox";
 import emitter from "element-ui/src/mixins/emitter";
-import Dragula from "dragula";
-import "dragula/dist/dragula.css";
 
 export default {
   name: "ElTreeNode",
@@ -109,25 +107,19 @@ export default {
       showCheckbox: false,
       showCombineLine: false,
       oldChecked: null,
-      oldIndeterminate: null
+      oldIndeterminate: null,
+      draggable: false,
+      dragging: false
     };
   },
 
-  mounted() {
+  mounted() {},
 
-  },
+  beforeDestroy() {},
 
-  beforeDestroy() {
+  beforeUpdate() {},
 
-  },
-
-  beforeUpdate() {
-
-  },
-
-  updated() {
-
-  },
+  updated() {},
 
   watch: {
     "node.indeterminate"(val) {
@@ -218,6 +210,191 @@ export default {
       if (this.tree.expandOnClickNode) {
         this.handleExpandIconClick();
       }
+    },
+
+    handleMouseDown(e) {
+      if (!this.draggable) return;
+
+      this.enableShadow = false;
+
+      let node = this.$refs.node;
+
+      if (!this.tree.isDragValidImpl(this.node)) {
+        return;
+      }
+
+      this.dragTarget = node;
+      this._handleMouseMove = this.handleMouseMove.bind(this);
+      this._handleMouseUp = this.handleMouseUp.bind(this);
+      document.addEventListener("mousemove", this._handleMouseMove);
+      document.addEventListener("mouseup", this._handleMouseUp);
+      e.stopPropagation();
+      console.log("mouse_down");
+    },
+
+    handleMouseMove(e) {
+      if (this.enableShadow && !this.shadowInit) {
+        let rect = this.dragTarget.getBoundingClientRect();
+        this.targetRect = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+        this.shadow = this.dragTarget.cloneNode(true);
+        this.shadow.removeChild(this.shadow.lastChild);
+
+        this.shadow.id = this.shadow.id + "__shadow";
+        document.body.appendChild(this.shadow);
+        this.shadowInit = true;
+        this.shadow.style.position = "fixed";
+        this.shadow.style.z_index = 99999;
+      }
+
+      if (this.enableShadow) {
+        Object.assign(this.shadow.style, {
+          top: e.clientY - this.targetRect.y + "px",
+          left: e.clientX - this.targetRect.x + "px"
+        });
+      }
+
+      this.updateDraggingIndicator(e.clientX, e.clientY);
+
+      e.stopPropagation();
+    },
+
+    updateDraggingIndicator(x, y) {
+      if (!this.indicator) {
+        this.addIndicator();
+      }
+      let dropTarget = this.getItemUnderCursor(x, y);
+      if (dropTarget) {
+        let node = this.node.store.getNode(dropTarget.id);
+        if (node) {
+          if (dropTarget == this.$refs.node) {
+            dropTarget = null;
+          } else {
+            dropTarget = this.tree.isDropValidImpl(this.node, node)
+              ? dropTarget
+              : null;
+          }
+        }
+      }
+      if (dropTarget == this.lastDropTarget) {
+        this.updateIndicatorPos(x, y);
+      } else {
+        this.lastDropTarget = dropTarget;
+        if (dropTarget != null) {
+          this.lastDropTargetRect = dropTarget.getBoundingClientRect();
+          this.updateIndicatorPos(x, y);
+
+          let node = this.node.store.getNode(dropTarget.id);
+          this.shouldShowIndicator = this.tree.shouldShowDragIndicatorImpl(node);
+        } else {
+          this.lastDropTarget = null;
+          this.hideIndicator();
+        }
+      }
+    },
+
+    addIndicator() {
+      let indicator = document.createElement("div");
+      indicator.className = "el-tree-node-drag-indicator";
+      this.indicator = indicator;
+      document.body.appendChild(this.indicator);
+
+      Object.assign(indicator.style, {
+        position: "fixed",
+        display: "none",
+        width: "300px",
+        height: "3px",
+        background: "red"
+      });
+    },
+
+    hideIndicator() {
+      this.indicator.style.display = "none";
+    },
+
+    showIndicator() {
+      this.indicator.style.display = "block";
+    },
+
+    updateIndicator(x, y) {
+      if (this.shouldShowIndicator) {
+        this.showIndicator();
+        Object.assign(this.indicator.style, {
+          left: x + 35 + "px",
+          top: y + "px"
+        });
+      } else {
+        this.hideIndicator();
+      }
+    },
+
+    removeIndicator() {
+      if (this.indicator) {
+        document.body.removeChild(this.indicator);
+        this.indicator = null;
+      }
+    },
+
+    updateIndicatorPos(x, y) {
+      if (!this.lastDropTarget) return;
+      let y1 = this.lastDropTargetRect.top;
+      let y2 = this.lastDropTargetRect.top + this.lastDropTargetRect.height;
+      console.assert(y1 <= y && y <= y2);
+      let middle = (y2 + y1) / 2;
+
+      let left = this.lastDropTargetRect.left;
+      let contentPadding = parseInt(
+        this.lastDropTarget.firstChild.style.paddingLeft
+      );
+      if (y < middle) {
+        this.updateIndicator(left + contentPadding, y1);
+        this.draggingInsertPos = "node-insert-before";
+      } else if (y > middle) {
+        this.updateIndicator(left + contentPadding, y2);
+        this.draggingInsertPos = "node-insert-after";
+      }
+    },
+
+    getItemUnderCursor(x, y) {
+      let item = document.elementFromPoint(x, y);
+      while (item) {
+        if (item.className) {
+          let itemClasses = item.className.split(" ");
+          if (itemClasses.indexOf("el-tree-node") != -1) {
+            return item;
+          }
+        }
+        item = item.parentNode;
+      }
+
+      return null;
+    },
+
+    handleMouseUp(e) {
+      if (!this.draggable) return;
+
+      if (this.shadow) {
+        document.body.removeChild(this.shadow);
+        this.shadow = null;
+        this.shadowInit = false;
+      }
+
+      if (this.indicator) {
+        this.removeIndicator();
+      }
+
+      document.removeEventListener("mousemove", this._handleMouseMove);
+      document.removeEventListener("mouseup", this._handleMouseUp);
+      e.stopPropagation();
+      if (this.lastDropTarget) {
+        let node = this.node.store.getNode(this.lastDropTarget.id);
+        if (node) {
+          this.tree.$emit(this.draggingInsertPos, this.node.data, node.data);
+        }
+      }
+      console.log("mouse_up");
     },
 
     handleClick() {

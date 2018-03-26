@@ -20,8 +20,6 @@
 import TreeStore from "./model/tree-store";
 import { t } from "element-ui/src/locale";
 import emitter from "element-ui/src/mixins/emitter";
-import Dragula from "dragula";
-import DragulaInstance from "./model/dragula-instance";
 
 export default {
   name: "ElTree",
@@ -36,8 +34,7 @@ export default {
     return {
       store: null,
       root: null,
-      currentNode: null,
-      drake: {}
+      currentNode: null
     };
   },
 
@@ -109,7 +106,7 @@ export default {
     isDropValid: {
       default: null
     },
-    shouldShowShadowItem: {
+    shouldShowDragIndicator: {
       default: null
     }
   },
@@ -146,8 +143,7 @@ export default {
     isActive(newVal) {
       if (newVal) {
         if (this.draggable) {
-          this.drake.removeEventListener();
-          this.drake.addEventListener(this);
+
         }
       }
     }
@@ -258,16 +254,16 @@ export default {
 
       return this.isDropValid(node.data, target.data);
     },
-    shouldShowShadowItemImpl(node) {
+    shouldShowDragIndicatorImpl(node) {
       if (!this.draggable) {
         return false;
       }
 
-      if (!this.shouldShowShadowItem) {
+      if (!this.shouldShowDragIndicator) {
         return true;
       }
 
-      return this.shouldShowShadowItem(node.data);
+      return this.shouldShowDragIndicator(node.data);
     }
   },
 
@@ -294,12 +290,7 @@ export default {
 
   mounted() {
     if (this.draggable) {
-      this.drake = DragulaInstance;
 
-      if (this.isActive) {
-        this.drake.removeEventListener();
-        this.drake.addEventListener(this);
-      }
     }
   },
 
