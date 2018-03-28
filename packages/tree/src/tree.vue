@@ -197,7 +197,7 @@ export default {
           store.currentNode ? store.currentNode.data : null,
           store.currentNode
         );
-        node.expand(undefined, true);
+        node.expandParent();
       }
     },
     collapseAllNode(data) {
@@ -222,6 +222,14 @@ export default {
       const node = this.store.getNode(data);
       if (node) {
         node.collapse();
+      }
+    },
+    toggleNode(data) {
+      const node = this.store.getNode(data);
+      if (node.expand) {
+        node.collapse();
+      } else {
+        node.expand();
       }
     },
     hideNode(id, hidden) {

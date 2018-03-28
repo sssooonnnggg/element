@@ -198,6 +198,7 @@ export default {
 
     setCurrentNode() {
       const store = this.tree.store;
+      if (store.currentNode == this.node) return;
       if (store.currentNode != undefined) store.currentNode.isCurrent = false;
       this.tree.currentNode = this;
       this.node.isCurrent = true;
@@ -229,7 +230,7 @@ export default {
       document.addEventListener("mousemove", this._handleMouseMove);
       document.addEventListener("mouseup", this._handleMouseUp);
       e.stopPropagation();
-      console.log("mouse_down");
+      //console.log("mouse_down");
     },
 
     handleMouseMove(e) {
@@ -328,7 +329,7 @@ export default {
         this.showIndicator();
         Object.assign(this.indicator.style, {
           left: x + 35 + "px",
-          top: y + "px"
+          top: (y - 1) + "px"
         });
       } else {
         this.hideIndicator();
@@ -403,7 +404,7 @@ export default {
           this.tree.$emit(this.draggingInsertPos, this.node.data, node.data);
         }
       }
-      console.log("mouse_up");
+      //console.log("mouse_up");
     },
 
     handleClick() {

@@ -294,6 +294,14 @@ export default class Node {
     }
   }
 
+  expandParent() {
+    let parent = this.parent;
+    while (parent && parent.level > 0) {
+      parent.expanded = true;
+      parent = parent.parent;
+    }
+  }
+
   doCreateChildren(array, defaultProps = {}) {
     array.forEach(item => {
       this.insertChild(
