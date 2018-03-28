@@ -226,7 +226,7 @@ export default {
     },
     toggleNode(data) {
       const node = this.store.getNode(data);
-      if (node.expand) {
+      if (node.expanded) {
         node.collapse();
       } else {
         node.expand();
