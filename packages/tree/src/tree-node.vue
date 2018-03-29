@@ -109,7 +109,8 @@ export default {
       oldChecked: null,
       oldIndeterminate: null,
       draggable: false,
-      dragging: false
+      dragging: false,
+      enableShadow: false
     };
   },
 
@@ -215,9 +216,6 @@ export default {
 
     handleMouseDown(e) {
       if (!this.draggable) return;
-
-      this.enableShadow = false;
-
       let node = this.$refs.node;
 
       if (!this.tree.isDragValidImpl(this.node)) {
@@ -234,6 +232,7 @@ export default {
     },
 
     handleMouseMove(e) {
+
       if (this.enableShadow && !this.shadowInit) {
         let rect = this.dragTarget.getBoundingClientRect();
         this.targetRect = {
@@ -250,6 +249,8 @@ export default {
         this.shadow.style.z_index = 99999;
       }
 
+      let dropTarget = this.updateDraggingIndicator(e.clientX, e.clientY);
+
       if (this.enableShadow) {
         Object.assign(this.shadow.style, {
           top: e.clientY - this.targetRect.y + "px",
@@ -257,7 +258,11 @@ export default {
         });
       }
 
-      this.updateDraggingIndicator(e.clientX, e.clientY);
+      if (dropTarget) {
+        this.shadow.style.display = 'block';
+      } else {
+        this.shadow.style.display = 'none';
+      }
 
       e.stopPropagation();
     },
@@ -266,8 +271,17 @@ export default {
       if (!this.indicator) {
         this.addIndicator();
       }
+      if (this.enableShadow && this.shadow) {
+        this.shadow.style.display = 'none';
+      }
       let dropTarget = this.getItemUnderCursor(x, y);
-      if (!this.tree.$refs.container.contains(dropTarget)) {
+      if (this.enableShadow && this.shadow) {
+        this.shadow.style.display = 'block';
+      }
+      if (dropTarget && !this.tree.$refs.container.contains(dropTarget)) {
+        dropTarget = null;
+      }
+      if (dropTarget && this.$refs.node.contains(dropTarget)) {
         dropTarget = null;
       }
       if (dropTarget) {
@@ -299,6 +313,7 @@ export default {
           this.hideIndicator();
         }
       }
+      return dropTarget;
     },
 
     addIndicator() {
@@ -329,7 +344,7 @@ export default {
         this.showIndicator();
         Object.assign(this.indicator.style, {
           left: x + 35 + "px",
-          top: (y - 1) + "px"
+          top: y - 1 + "px"
         });
       } else {
         this.hideIndicator();
@@ -481,6 +496,7 @@ export default {
     this.showCheckbox = tree.showCheckbox;
     this.showCombineLine = tree.showCombineLine;
     this.draggable = tree.draggable;
+    this.enableShadow = tree.enableShadow;
 
     if (this.node.expanded) {
       this.expanded = true;

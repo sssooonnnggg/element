@@ -222,6 +222,7 @@
           console.log(data);
           return true;
         },
+        enableShadow:true,
         data,
         data2,
         regions,
@@ -246,7 +247,7 @@
 ::: demo
 
 ```html
-<el-tree :data="data" node-key="label" :draggable="true" :props="defaultProps" @node-click="handleNodeClick" :indent='40' :is-drag-valid="isDragValid"></el-tree>
+<el-tree :data="data" node-key="label" :draggable="true" :props="defaultProps" @node-click="handleNodeClick" :indent='40' :is-drag-valid="isDragValid" :enable-shadow="enableShadow"></el-tree>
 
 <script>
   export default {

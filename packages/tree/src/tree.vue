@@ -108,6 +108,9 @@ export default {
     },
     shouldShowDragIndicator: {
       default: null
+    },
+    enableShadow: {
+      default: false
     }
   },
 
@@ -143,7 +146,6 @@ export default {
     isActive(newVal) {
       if (newVal) {
         if (this.draggable) {
-
         }
       }
     }
@@ -298,7 +300,6 @@ export default {
 
   mounted() {
     if (this.draggable) {
-
     }
   },
 
