@@ -234,10 +234,16 @@ export default {
         node.expand();
       }
     },
-    hideNode(id, hidden) {
+    hide(id) {
       const node = this.store.getNode(id);
       if (node) {
-        node.hidden = hidden;
+        node.visible = false;
+      }
+    },
+    show(id) {
+      const node = this.store.getNode(id);
+      if (node) {
+        node.visible = true;
       }
     },
     isVisible(id) {
