@@ -238,13 +238,19 @@ export default {
       const node = this.store.getNode(id);
       if (node) {
         node.visible = false;
+        node.data.visible = false;
       }
     },
     show(id) {
       const node = this.store.getNode(id);
       if (node) {
         node.visible = true;
+        node.data.visible = true;
       }
+    },
+    updateIndent(id) {
+      let node = this.store.getNode(id);
+      node.updateIndent();
     },
     isVisible(id) {
       let el = document.getElementById(id);

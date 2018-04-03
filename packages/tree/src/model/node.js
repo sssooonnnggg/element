@@ -111,6 +111,10 @@ export default class Node {
       } else {
         this.expanded = false;
       }
+
+      if (this.data.visible != undefined) {
+        this.visible = this.data.visible;
+      }
     } else if (this.level > 0 && store.lazy && store.defaultExpandAll) {
       this.expand();
     }
@@ -190,14 +194,22 @@ export default class Node {
 
   get combineLineColor() {
     const data = this.data || {};
-    return data.combineLineColor ? data.combineLineColor : 'transparent';
+    return data.combineLineColor ? data.combineLineColor : "transparent";
   }
 
   get enable() {
     const data = this.data || {};
-    if (data.enable == undefined)
-      return true;
+    if (data.enable == undefined) return true;
     return data.enable;
+  }
+
+  updateIndent() {
+    if (this.parent) {
+      this.indent =
+        this.noIndent || this.hiddenSelf
+          ? this.parent.indent
+          : this.parent.indent + 1;
+    }
   }
 
   insertChild(child, index) {
@@ -357,9 +369,7 @@ export default class Node {
       !this.store.lazy ||
       (this.store.lazy === true && this.loaded === true)
     ) {
-
       let nodeIsHidden = function(node) {
-
         if (!node.hidden) {
           return false;
         }
@@ -389,11 +399,10 @@ export default class Node {
         }
 
         return true;
-      }
+      };
+
       this.isLeaf =
-        !childNodes ||
-        childNodes.length === 0 ||
-        isDescendantHidden(this);
+        !childNodes || childNodes.length === 0 || isDescendantHidden(this);
       return;
     }
     this.isLeaf = false;
