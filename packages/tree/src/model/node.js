@@ -206,7 +206,7 @@ export default class Node {
 
   get valid() {
     const data = this.data || {};
-    if (data.valid == undefined) return false;
+    if (data.valid == undefined) return true;
     return data.valid;
   }
 
