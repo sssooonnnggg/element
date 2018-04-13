@@ -12,6 +12,7 @@
         'is-expanded': childNodeRendered && expanded,
         'is-current': node.isCurrent,
         'is-hidden': !node.visible,
+        'el-tree-node-invalid': node.invalid,
         'el-tree-node-disabled':!node.enable,
         'node-combine-line-container':shouldShowCombineLine
       }">
@@ -244,14 +245,11 @@ export default {
 
     handleMouseMove(e) {
       if (this.enableShadow && !this.shadowInit) {
-        let rect = this.dragTarget.getBoundingClientRect();
-        this.targetRect = {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        };
-        this.shadow = this.dragTarget.cloneNode(true);
-        this.shadow.removeChild(this.shadow.lastChild);
-        this.shadow.firstChild.style.background = "transparent";
+        let target = this.dragTarget.firstChild;
+        let rect = target.getBoundingClientRect();
+        this.targetPaddingLeft = parseInt(target.style.paddingLeft);
+        this.shadow = target.cloneNode(true);
+        this.shadow.style.background = "transparent";
 
         this.shadow.id = this.shadow.id + "__shadow";
         document.body.appendChild(this.shadow);
@@ -265,7 +263,7 @@ export default {
       if (this.enableShadow) {
         Object.assign(this.shadow.style, {
           top: e.clientY + "px",
-          left: e.clientX + "px"
+          left: e.clientX - this.targetPaddingLeft + "px"
         });
       }
 
@@ -531,6 +529,9 @@ export default {
 <<style>
 .el-tree-node-disabled {
   opacity: 0.5;
+}
+.el-tree-node-invalid {
+  background-color:rgba(100, 0, 0, 1);
 }
 .node-combine-line-container {
   position: relative;

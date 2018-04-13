@@ -115,6 +115,7 @@ export default class Node {
       if (this.data.visible != undefined) {
         this.visible = this.data.visible;
       }
+
     } else if (this.level > 0 && store.lazy && store.defaultExpandAll) {
       this.expand();
     }
@@ -201,6 +202,12 @@ export default class Node {
     const data = this.data || {};
     if (data.enable == undefined) return true;
     return data.enable;
+  }
+
+  get invalid() {
+    const data = this.data || {};
+    if (data.invalid == undefined) return false;
+    return data.invalid;
   }
 
   updateIndent() {
