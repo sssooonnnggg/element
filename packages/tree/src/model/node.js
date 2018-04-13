@@ -204,10 +204,10 @@ export default class Node {
     return data.enable;
   }
 
-  get invalid() {
+  get valid() {
     const data = this.data || {};
-    if (data.invalid == undefined) return false;
-    return data.invalid;
+    if (data.valid == undefined) return false;
+    return data.valid;
   }
 
   updateIndent() {

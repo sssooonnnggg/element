@@ -12,7 +12,7 @@
         'is-expanded': childNodeRendered && expanded,
         'is-current': node.isCurrent,
         'is-hidden': !node.visible,
-        'el-tree-node-invalid': node.invalid,
+        'el-tree-node-invalid': !node.valid,
         'el-tree-node-disabled':!node.enable,
         'node-combine-line-container':shouldShowCombineLine
       }">
