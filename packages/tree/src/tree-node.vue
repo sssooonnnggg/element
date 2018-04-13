@@ -18,10 +18,13 @@
     <div :class='{"el-tree-node__content": true}'
       :style="{ 'padding-left': indent + 'px' }"
       v-if="!node.hiddenSelf">
-      <span class="el-tree-node__expand-icon"
+      <span class="el-tree-node__expand-icon-container"
+        style='margin-right:5px;display:inline-block'
         @click.stop="handleExpandIconClick"
-        @dblclick.stop
-        :class="{ 'is-leaf': node.isLeaf, expanded: !node.isLeaf && expanded }">
+        @dblclick.stop>
+        <span class="el-tree-node__expand-icon"
+          :class="{ 'is-leaf': node.isLeaf, expanded: !node.isLeaf && expanded }">
+        </span>
       </span>
       <el-checkbox v-if="showCheckbox"
         v-model="node.checked"
@@ -232,7 +235,6 @@ export default {
     },
 
     handleMouseMove(e) {
-
       if (this.enableShadow && !this.shadowInit) {
         let rect = this.dragTarget.getBoundingClientRect();
         this.targetRect = {
@@ -259,9 +261,9 @@ export default {
       }
 
       if (dropTarget) {
-        this.shadow.style.display = 'block';
+        this.shadow.style.display = "block";
       } else {
-        this.shadow.style.display = 'none';
+        this.shadow.style.display = "none";
       }
 
       e.stopPropagation();
@@ -272,11 +274,11 @@ export default {
         this.addIndicator();
       }
       if (this.enableShadow && this.shadow) {
-        this.shadow.style.display = 'none';
+        this.shadow.style.display = "none";
       }
       let dropTarget = this.getItemUnderCursor(x, y);
       if (this.enableShadow && this.shadow) {
-        this.shadow.style.display = 'block';
+        this.shadow.style.display = "block";
       }
       if (dropTarget && !this.tree.$refs.container.contains(dropTarget)) {
         dropTarget = null;
