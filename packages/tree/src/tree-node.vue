@@ -228,10 +228,18 @@ export default {
       this.dragTarget = node;
       this._handleMouseMove = this.handleMouseMove.bind(this);
       this._handleMouseUp = this.handleMouseUp.bind(this);
+      this._handleKeyDown = this.handleKeyDown.bind(this);
       document.addEventListener("mousemove", this._handleMouseMove);
       document.addEventListener("mouseup", this._handleMouseUp);
+      document.addEventListener("keydown", this._handleKeyDown);
       e.stopPropagation();
       //console.log("mouse_down");
+    },
+
+    handleKeyDown(e) {
+      if (e.keyCode == 27) {
+        this.releaseDragResource();
+      }
     },
 
     handleMouseMove(e) {
@@ -243,6 +251,7 @@ export default {
         };
         this.shadow = this.dragTarget.cloneNode(true);
         this.shadow.removeChild(this.shadow.lastChild);
+        this.shadow.firstChild.style.background = "transparent";
 
         this.shadow.id = this.shadow.id + "__shadow";
         document.body.appendChild(this.shadow);
@@ -255,8 +264,8 @@ export default {
 
       if (this.enableShadow) {
         Object.assign(this.shadow.style, {
-          top: e.clientY - this.targetRect.y + "px",
-          left: e.clientX - this.targetRect.x + "px"
+          top: e.clientY + "px",
+          left: e.clientX + "px"
         });
       }
 
@@ -401,7 +410,18 @@ export default {
 
     handleMouseUp(e) {
       if (!this.draggable) return;
+      this.releaseDragResource();
+      e.stopPropagation();
+      if (this.lastDropTarget) {
+        let node = this.node.store.getNode(this.lastDropTarget.id);
+        if (node) {
+          this.tree.$emit(this.draggingInsertPos, this.node.data, node.data);
+        }
+      }
+      //console.log("mouse_up");
+    },
 
+    releaseDragResource() {
       if (this.shadow) {
         document.body.removeChild(this.shadow);
         this.shadow = null;
@@ -414,14 +434,7 @@ export default {
 
       document.removeEventListener("mousemove", this._handleMouseMove);
       document.removeEventListener("mouseup", this._handleMouseUp);
-      e.stopPropagation();
-      if (this.lastDropTarget) {
-        let node = this.node.store.getNode(this.lastDropTarget.id);
-        if (node) {
-          this.tree.$emit(this.draggingInsertPos, this.node.data, node.data);
-        }
-      }
-      //console.log("mouse_up");
+      document.removeEventListener("keydown", this._handleKeyDown);
     },
 
     handleClick() {
