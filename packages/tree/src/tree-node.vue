@@ -12,11 +12,10 @@
         'is-expanded': childNodeRendered && expanded,
         'is-current': node.isCurrent,
         'is-hidden': !node.visible,
-        'el-tree-node-invalid': !node.valid,
         'el-tree-node-disabled':!node.enable,
         'node-combine-line-container':shouldShowCombineLine
       }">
-    <div :class='{"el-tree-node__content": true}'
+    <div :class='{"el-tree-node__content": true, "el-tree-node-invalid": !node.valid}'
       :style="{ 'padding-left': indent + 'px' }"
       v-if="!node.hiddenSelf">
       <span class="el-tree-node__expand-icon-container"
