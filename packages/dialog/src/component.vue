@@ -30,6 +30,30 @@
         v-if="$slots.footer">
         <slot name="footer"></slot>
       </div>
+      <div class='el-dialog__resizer corner bottom-right'
+        @mousedown='handleResizerMouseDown($event, false, false)'>
+      </div>
+      <div class='el-dialog__resizer corner bottom-left'
+        @mousedown='handleResizerMouseDown($event, true, false)'>
+      </div>
+      <div class='el-dialog__resizer corner top-left'
+        @mousedown='handleResizerMouseDown($event, true, true)'>
+      </div>
+      <div class='el-dialog__resizer corner top-right'
+        @mousedown='handleResizerMouseDown($event, false, true)'>
+      </div>
+      <div class='el-dialog__resizer sider top'
+        @mousedown='handleResizerMouseDown($event, false, true, false, true)'>
+      </div>
+      <div class='el-dialog__resizer sider bottom'
+        @mousedown='handleResizerMouseDown($event, false, false, false, true)'>
+      </div>
+      <div class='el-dialog__resizer sider left'
+        @mousedown='handleResizerMouseDown($event, true, false, true, false)'>
+      </div>
+      <div class='el-dialog__resizer sider right'
+        @mousedown='handleResizerMouseDown($event, false, false, true, false)'>
+      </div>
     </div>
   </div>
 </template>
@@ -84,6 +108,11 @@ export default {
       default: "small"
     },
 
+    resizable: {
+      type: Boolean,
+      default: false
+    },
+
     customClass: {
       type: String,
       default: ""
@@ -91,19 +120,29 @@ export default {
 
     top: {},
     left: {},
+    width: {},
+    height: {},
     beforeClose: Function
   },
 
   data() {
     return {
       l: 0,
-      t: 0
+      t: 0,
+      w: 400,
+      h: 200,
+      minW: 400,
+      minH: 200,
+      dragging: false,
+      resizing: false
     };
   },
 
   created() {
     this.t = this.top || 200;
     this.l = this.left || -1;
+    this.w = this.width ? this.width : this.w;
+    this.h = this.height ? this.height : this.h;
   },
 
   mounted() {
@@ -138,7 +177,9 @@ export default {
     style() {
       return {
         top: this.realTop,
-        left: this.realLeft
+        left: this.realLeft,
+        width: this.realWidth,
+        height: this.realHeight
       };
     },
     realTop() {
@@ -146,6 +187,12 @@ export default {
     },
     realLeft() {
       return typeof this.l == "string" ? this.l : this.l + "px";
+    },
+    realWidth() {
+      return this.w + "px";
+    },
+    realHeight() {
+      return this.h + "px";
     }
   },
 
@@ -216,23 +263,132 @@ export default {
       };
     },
     handleMouseMove(e) {
-      if (!this.dragging) {
-        return;
+      if (this.dragging) {
+        let delta = {
+          x: e.clientX - this.dragPos.x,
+          y: e.clientY - this.dragPos.y
+        };
+
+        this.l = this.oldPos.l + delta.x;
+        this.t = this.oldPos.t + delta.y;
+
+        this.updateBounding();
+      } else if (this.resizing) {
+        let info = this.resizingInfo;
+        let deltaX = e.clientX - info.x;
+        let deltaY = e.clientY - info.y;
+        let w = info.originW + deltaX * (info.moveX ? -1 : 1);
+        let h = info.originH + deltaY * (info.moveY ? -1 : 1);
+        if (w < this.minW || h < this.minH) {
+          return;
+        }
+
+        if (info.enableX) {
+          this.w = w;
+        }
+
+        if (info.enableY) {
+          this.h = h;
+        }
+
+        if (info.moveX && info.enableX) {
+          this.l = info.originX + deltaX;
+        }
+        if (info.moveY && info.enableY) {
+          this.t = info.originY + deltaY;
+        }
       }
-
-      let delta = {
-        x: e.clientX - this.dragPos.x,
-        y: e.clientY - this.dragPos.y
-      };
-
-      this.l = this.oldPos.l + delta.x;
-      this.t = this.oldPos.t + delta.y;
-
-      this.updateBounding();
     },
     handleMouseUp(e) {
       this.dragging = false;
+      this.resizing = false;
+    },
+    handleResizerMouseDown(e, moveX, moveY, enableX = true, enableY = true) {
+      this.resizing = true;
+      this.resizingInfo = {
+        x: e.clientX,
+        y: e.clientY,
+        originW: this.w,
+        originH: this.h,
+        moveX,
+        moveY,
+        enableX,
+        enableY,
+        originX: this.l,
+        originY: this.t
+      };
     }
   }
 };
 </script>
+<style>
+.el-dialog__resizer.corner {
+  position: absolute;
+  /* background-color: red; */
+  width: 10px;
+  height: 10px;
+}
+
+.el-dialog__resizer.corner.bottom-right {
+  bottom: 0px;
+  right: 0px;
+  cursor: nwse-resize;
+}
+
+.el-dialog__resizer.corner.top-left {
+  top: 0px;
+  left: 0px;
+  cursor: nwse-resize;
+}
+
+.el-dialog__resizer.corner.top-right {
+  top: 0px;
+  right: 0px;
+  cursor: nesw-resize;
+}
+
+.el-dialog__resizer.corner.bottom-left {
+  bottom: 0px;
+  left: 0px;
+  cursor: nesw-resize;
+}
+
+.el-dialog__resizer.sider {
+  position: absolute;
+  /* background-color: red; */
+}
+
+.el-dialog__resizer.sider.top {
+  top: 0px;
+  left: 10px;
+  right: 10px;
+  height: 10px;
+  cursor: ns-resize;
+}
+
+.el-dialog__resizer.sider.bottom {
+  bottom: 0px;
+  left: 10px;
+  right: 10px;
+  height: 10px;
+  cursor: ns-resize;
+}
+
+.el-dialog__resizer.sider.left {
+  left: 0px;
+  top: 10px;
+  bottom: 10px;
+  width: 10px;
+  cursor: ew-resize;
+}
+
+.el-dialog__resizer.sider.right {
+  right: 0px;
+  top: 10px;
+  bottom: 10px;
+  width: 10px;
+  cursor: ew-resize;
+}
+
+
+</style>
