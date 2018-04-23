@@ -110,7 +110,7 @@ export default {
 
     resizable: {
       type: Boolean,
-      default: false
+      default: true
     },
 
     customClass: {
@@ -142,7 +142,9 @@ export default {
     this.t = this.top || 200;
     this.l = this.left || -1;
     this.w = this.width ? this.width : this.w;
-    this.h = this.height ? this.height : this.h;
+    this.h = this.height;
+    this.minW = this.width ? this.width : this.minW;
+    this.minH = this.height;
   },
 
   mounted() {
@@ -167,6 +169,10 @@ export default {
         this.$el.removeEventListener("scroll", this.updatePopper);
         this.$emit("close");
       }
+    },
+    height(newHeight) {
+      this.minH = newHeight;
+      this.h = newHeight;
     }
   },
 
@@ -192,7 +198,7 @@ export default {
       return this.w + "px";
     },
     realHeight() {
-      return this.h + "px";
+      return this.h ? (this.h + "px") : 'auto';
     }
   },
 
@@ -304,6 +310,9 @@ export default {
       this.resizing = false;
     },
     handleResizerMouseDown(e, moveX, moveY, enableX = true, enableY = true) {
+      if (!this.resizable) {
+        return;
+      }
       this.resizing = true;
       this.resizingInfo = {
         x: e.clientX,
@@ -322,6 +331,21 @@ export default {
 };
 </script>
 <style>
+.el-dialog {
+  display: flex;
+  flex-flow: column;
+}
+.el-dialog__body {
+  display: flex;
+  flex-flow: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+.el-dialog__header,
+.el-dialog__footer {
+  flex-grow: 0;
+  flex-shrink: 0;
+}
 .el-dialog__resizer.corner {
   position: absolute;
   /* background-color: red; */
@@ -356,6 +380,7 @@ export default {
 .el-dialog__resizer.sider {
   position: absolute;
   /* background-color: red; */
+  background-color: transparent;
 }
 
 .el-dialog__resizer.sider.top {
@@ -371,6 +396,7 @@ export default {
   left: 10px;
   right: 10px;
   height: 10px;
+  width: auto;
   cursor: ns-resize;
 }
 
@@ -389,6 +415,4 @@ export default {
   width: 10px;
   cursor: ew-resize;
 }
-
-
 </style>
