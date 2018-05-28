@@ -12,7 +12,7 @@
         'is-expanded': childNodeRendered && expanded,
         'is-current': node.isCurrent,
         'is-hidden': !node.visible,
-        'el-tree-node-disabled':!node.enable,
+        'el-tree-node-disabled':!node.enable && useDisableStyle,
         'node-combine-line-container':shouldShowCombineLine
       }">
     <div :class='{"el-tree-node__content": true, "el-tree-node-invalid": !node.valid}'
@@ -113,7 +113,8 @@ export default {
       oldIndeterminate: null,
       draggable: false,
       dragging: false,
-      enableShadow: false
+      enableShadow: false,
+      useDisableStyle: false
     };
   },
 
@@ -509,6 +510,7 @@ export default {
     this.showCombineLine = tree.showCombineLine;
     this.draggable = tree.draggable;
     this.enableShadow = tree.enableShadow;
+    this.useDisableStyle = tree.useDisableStyle;
 
     if (this.node.expanded) {
       this.expanded = true;

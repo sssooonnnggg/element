@@ -111,6 +111,9 @@ export default {
     },
     enableShadow: {
       default: false
+    },
+    useDisableStyle: {
+      default: false
     }
   },
 
