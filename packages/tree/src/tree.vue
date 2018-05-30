@@ -7,6 +7,8 @@
       :props="props"
       :key="getNodeKey(child)"
       :render-content="renderContent"
+      :render-custom-expand-icon="renderCustomExpandIcon"
+      :render-combine-line="renderCombineLine"
       @node-expand="handleNodeExpand">
     </el-tree-node>
     <div class="el-tree__empty-block"
@@ -62,6 +64,14 @@ export default {
     defaultCheckedKeys: Array,
     defaultExpandedKeys: Array,
     renderContent: Function,
+    renderCustomExpandIcon: {
+      type: Function,
+      default: null
+    },
+    renderCombineLine: {
+      type: Function,
+      default: null
+    },
     showCheckbox: {
       type: Boolean,
       default: false
@@ -90,7 +100,7 @@ export default {
     },
     showCombineLine: {
       type: Boolean,
-      default: true
+      default: false
     },
     draggable: {
       type: Boolean,
@@ -113,6 +123,9 @@ export default {
       default: false
     },
     useDisableStyle: {
+      default: false
+    },
+    useCustomExpandIcon: {
       default: false
     }
   },

@@ -12,8 +12,7 @@
         'is-expanded': childNodeRendered && expanded,
         'is-current': node.isCurrent,
         'is-hidden': !node.visible,
-        'el-tree-node-disabled':!node.enable && useDisableStyle,
-        'node-combine-line-container':shouldShowCombineLine
+        'el-tree-node-disabled':!node.enable && useDisableStyle
       }">
     <div :class='{"el-tree-node__content": true, "el-tree-node-invalid": !node.valid}'
       :style="{ 'padding-left': indent + 'px' }"
@@ -23,8 +22,12 @@
         @click.stop="handleExpandIconClick"
         @dblclick.stop>
         <span class="el-tree-node__expand-icon"
-          :class="{ 'is-leaf': node.isLeaf, expanded: !node.isLeaf && expanded }">
+          :class="{ 'is-leaf': node.isLeaf, expanded: !node.isLeaf && expanded }"
+          v-if='!useCustomExpandIcon'>
         </span>
+        <custom-expand-icon v-else
+          :node="node"
+          :expanded="expanded"></custom-expand-icon>
       </span>
       <el-checkbox v-if="showCheckbox"
         v-model="node.checked"
@@ -37,12 +40,16 @@
       </span>
       <node-content :node="node"></node-content>
     </div>
-    <div class='node-combine-line'
-      v-if='shouldShowCombineLine'
-      :style="{ 'margin-left': combineLineIndent + 'px', 'border-color':node.combineLineColor }"></div>
     <div class="el-tree-node__children"
       v-show="expanded || node.hiddenSelf">
+      <combine-line v-if="showCombineLine"
+        class="combine-line"
+        :node="node"
+        :expanded="expanded"
+        :indent="indent"></combine-line>
       <el-tree-node :render-content="renderContent"
+        :render-custom-expand-icon="renderCustomExpandIcon"
+        :render-combine-line="renderCombineLine"
         v-for="child in node.childNodes"
         :key="getNodeKey(child)"
         :node="child"
@@ -71,12 +78,58 @@ export default {
       }
     },
     props: {},
-    renderContent: Function
+    renderContent: Function,
+    renderCustomExpandIcon: Function,
+    renderCombineLine: Function
   },
 
   components: {
     ElCollapseTransition,
     ElCheckbox,
+    CombineLine: {
+      props: {
+        node: {
+          required: true
+        },
+        expanded: {},
+        indent: {}
+      },
+      render(h) {
+        const parent = this.$parent;
+        const node = this.node;
+        const data = node.data;
+        const store = node.store;
+        return parent.renderCombineLine.call(parent._renderProxy, h, {
+          _self: parent.tree.$vnode.context,
+          node,
+          data,
+          store,
+          expanded: this.expanded,
+          indent: this.indent
+        });
+      }
+    },
+    CustomExpandIcon: {
+      props: {
+        node: {
+          required: true
+        },
+        expanded: {}
+      },
+      render(h) {
+        const parent = this.$parent;
+        const node = this.node;
+        const data = node.data;
+        const store = node.store;
+        return parent.renderCustomExpandIcon.call(parent._renderProxy, h, {
+          _self: parent.tree.$vnode.context,
+          node,
+          data,
+          store,
+          expanded: this.expanded
+        });
+      }
+    },
     NodeContent: {
       props: {
         node: {
@@ -108,13 +161,13 @@ export default {
       expanded: false,
       childNodeRendered: false,
       showCheckbox: false,
-      showCombineLine: false,
       oldChecked: null,
       oldIndeterminate: null,
       draggable: false,
       dragging: false,
       enableShadow: false,
-      useDisableStyle: false
+      useDisableStyle: false,
+      showCombineLine: false
     };
   },
 
@@ -146,35 +199,6 @@ export default {
   computed: {
     indent() {
       return (this.node.indent - 1) * this.tree.indent;
-    },
-    combineLineIndent() {
-      let indent = this.node.hiddenSelf
-        ? this.node.indent
-        : this.node.indent - 1;
-      return indent * this.tree.indent;
-    },
-    shouldShowCombineLine() {
-      if (!this.showCombineLine || this.node.hideCombineLine) {
-        return false;
-      }
-
-      if (
-        this.node.hiddenSelf &&
-        !this.node.noIndent &&
-        this.node.childNodes.length > 1
-      ) {
-        return true;
-      }
-
-      let node = this.node;
-      if (
-        node.childNodes.find(child => child.noIndent && !child.hiddenSelf) &&
-        this.expanded
-      ) {
-        return true;
-      }
-
-      return false;
     }
   },
 
@@ -511,6 +535,7 @@ export default {
     this.draggable = tree.draggable;
     this.enableShadow = tree.enableShadow;
     this.useDisableStyle = tree.useDisableStyle;
+    this.useCustomExpandIcon = tree.useCustomExpandIcon;
 
     if (this.node.expanded) {
       this.expanded = true;
@@ -534,15 +559,13 @@ export default {
 .el-tree-node-invalid {
   background-color:rgba(100, 0, 0, 1);
 }
-.node-combine-line-container {
-  position: relative;
+
+.combine-line {
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  right:0;
 }
-.node-combine-line {
-  border: 3px solid black;
-  border-right-width: 0px;
-  top: 15px;
-  width: 10px;
-  bottom: 15px;
-  position: absolute;
-}
+
 </style>
