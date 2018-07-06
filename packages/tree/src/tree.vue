@@ -116,6 +116,9 @@ export default {
     isDropValid: {
       default: null
     },
+    isDropOutValid: {
+      default:null
+    },
     shouldShowDragIndicator: {
       default: null
     },
@@ -291,6 +294,17 @@ export default {
       }
 
       return this.isDropValid(node.data, target.data);
+    },
+    isDropOutValidImpl(node, target) {
+      if (!this.draggable) {
+        return false;
+      }
+
+      if (!this.isDropOutValid) {
+        return true;
+      }
+
+      return this.isDropOutValid(node.data, target);
     },
     shouldShowDragIndicatorImpl(node) {
       if (!this.draggable) {

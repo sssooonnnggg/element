@@ -301,23 +301,38 @@ export default {
     },
 
     updateDraggingIndicator(x, y) {
+      this.dropOut = false;
       if (!this.indicator) {
         this.addIndicator();
       }
       if (this.enableShadow && this.shadow) {
         this.shadow.style.display = "none";
       }
-      let dropTarget = this.getItemUnderCursor(x, y);
+
+      let dropTarget = document.elementFromPoint(x, y);
+      if (dropTarget && !this.tree.$refs.container.contains(dropTarget)) {
+        if (
+          dropTarget.className != "el-tree-node-drag-indicator" &&
+          this.tree.isDropOutValidImpl(this.node, dropTarget)
+        ) {
+          this.dropOut = true;
+        } else {
+          dropTarget = null;
+        }
+      }
+
+      if (!this.dropOut) {
+        dropTarget = this.getItemUnderCursor(x, y);
+      }
+
       if (this.enableShadow && this.shadow) {
         this.shadow.style.display = "block";
       }
-      if (dropTarget && !this.tree.$refs.container.contains(dropTarget)) {
+
+      if (!this.dropOut && dropTarget && this.$refs.node.contains(dropTarget)) {
         dropTarget = null;
       }
-      if (dropTarget && this.$refs.node.contains(dropTarget)) {
-        dropTarget = null;
-      }
-      if (dropTarget) {
+      if (!this.dropOut && dropTarget) {
         let node = this.node.store.getNode(dropTarget.id);
         if (node) {
           if (dropTarget == this.$refs.node) {
@@ -330,17 +345,25 @@ export default {
         }
       }
       if (dropTarget == this.lastDropTarget) {
-        this.updateIndicatorPos(x, y);
+        if (!this.dropOut) {
+          this.updateIndicatorPos(x, y);
+        }
       } else {
         this.lastDropTarget = dropTarget;
         if (dropTarget != null) {
           this.lastDropTargetRect = dropTarget.getBoundingClientRect();
-          this.updateIndicatorPos(x, y);
+          if (!this.dropOut) {
+            this.updateIndicatorPos(x, y);
+          }
 
-          let node = this.node.store.getNode(dropTarget.id);
-          this.shouldShowIndicator = this.tree.shouldShowDragIndicatorImpl(
-            node
-          );
+          if (this.dropOut) {
+            this.shouldShowIndicator = false;
+          } else {
+            let node = this.node.store.getNode(dropTarget.id);
+            this.shouldShowIndicator = this.tree.shouldShowDragIndicatorImpl(
+              node
+            );
+          }
         } else {
           this.lastDropTarget = null;
           this.hideIndicator();
@@ -435,9 +458,11 @@ export default {
       this.releaseDragResource();
       e.stopPropagation();
       if (this.lastDropTarget) {
-        let node = this.node.store.getNode(this.lastDropTarget.id);
-        if (node) {
+        if (!this.dropOut) {
+          let node = this.node.store.getNode(this.lastDropTarget.id);
           this.tree.$emit(this.draggingInsertPos, this.node.data, node.data);
+        } else {
+          this.tree.$emit("node-drop-out", this.node.data);
         }
       }
       //console.log("mouse_up");
