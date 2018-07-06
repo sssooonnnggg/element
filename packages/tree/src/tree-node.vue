@@ -360,6 +360,7 @@ export default {
             this.shouldShowIndicator = false;
           } else {
             let node = this.node.store.getNode(dropTarget.id);
+            this.dropNode = node;
             this.shouldShowIndicator = this.tree.shouldShowDragIndicatorImpl(
               node
             );
@@ -416,8 +417,10 @@ export default {
 
     updateIndicatorPos(x, y) {
       if (!this.lastDropTarget) return;
+      if (!this.dropNode) return;
       let y1 = this.lastDropTargetRect.top;
       let y2 = this.lastDropTargetRect.top + this.lastDropTargetRect.height;
+      let x1 = this.lastDropTargetRect.left;
       console.assert(y1 <= y && y <= y2);
       let middle = (y2 + y1) / 2;
 
@@ -429,10 +432,24 @@ export default {
           this.lastDropTarget.firstChild.style.paddingLeft
         );
       }
-      if (y < middle) {
+
+      if (this.tree.isAddChildValidImpl(this.node, this.dropNode)) {
+        let indent = this.tree.indent;
+        if (x - x1 > indent) {
+          contentPadding += indent;
+          this.dropAsChild = true;
+          let firstChild = this.lastDropTarget.firstChild;
+          let rect = firstChild.getBoundingClientRect();
+          y2 = rect.top + rect.height;
+        } else {
+          this.dropAsChild = false;
+        }
+      }
+
+      if (y < middle && !this.dropAsChild) {
         this.updateIndicator(left + contentPadding, y1);
         this.draggingInsertPos = "node-insert-before";
-      } else if (y > middle) {
+      } else {
         this.updateIndicator(left + contentPadding, y2);
         this.draggingInsertPos = "node-insert-after";
       }
@@ -460,7 +477,7 @@ export default {
       if (this.lastDropTarget) {
         if (!this.dropOut) {
           let node = this.node.store.getNode(this.lastDropTarget.id);
-          this.tree.$emit(this.draggingInsertPos, this.node.data, node.data);
+          this.tree.$emit(this.draggingInsertPos, this.node.data, node.data, this.dropAsChild);
         } else {
           this.tree.$emit("node-drop-out", this.node.data);
         }
