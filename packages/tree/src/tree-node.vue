@@ -258,6 +258,10 @@ export default {
       document.addEventListener("mouseup", this._handleMouseUp);
       document.addEventListener("keydown", this._handleKeyDown);
       e.stopPropagation();
+      this.originDragPos = {
+        x: e.clientX,
+        y: e.clientY
+      };
       //console.log("mouse_down");
     },
 
@@ -268,6 +272,11 @@ export default {
     },
 
     handleMouseMove(e) {
+
+      if (Math.abs(this.originDragPos.x - e.clientX) < 10 && Math.abs(this.originDragPos.y - e.clientY) < 10) {
+        return;
+      }
+
       if (this.enableShadow && !this.shadowInit) {
         let target = this.dragTarget.firstChild;
         let rect = target.getBoundingClientRect();
