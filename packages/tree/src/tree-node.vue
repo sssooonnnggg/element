@@ -282,7 +282,8 @@ export default {
         this.shadow.style.z_index = 99999;
       }
 
-      let dropTarget = this.updateDraggingIndicator(e.clientX, e.clientY);
+      let dropTarget = this.getDropTarget(e.clientX, e.clientY);
+      this.updateIndicator(e.clientX, e.clientY, dropTarget);
 
       if (this.enableShadow) {
         Object.assign(this.shadow.style, {
@@ -291,20 +292,49 @@ export default {
         });
       }
 
-      if (dropTarget) {
-        this.shadow.style.display = "block";
-      } else {
-        this.shadow.style.display = "none";
-      }
-
       e.stopPropagation();
     },
 
-    updateDraggingIndicator(x, y) {
-      this.dropOut = false;
+    updateIndicator(x, y, dropTarget) {
       if (!this.indicator) {
         this.addIndicator();
       }
+
+      if (this.dropOut) {
+        this.hideIndicator();
+        return;
+      }
+
+      if (dropTarget == this.lastDropTarget) {
+        this.updateIndicatorPos(x, y);
+      } else {
+        this.lastDropTarget = dropTarget;
+        if (dropTarget != null) {
+          let node = this.node.store.getNode(dropTarget.id);
+          this.dropAsSiblingValid = this.tree.isDropValidImpl(this.node, node);
+          this.dropAsChildValid = this.tree.isAddChildValidImpl(
+            this.node,
+            node
+          );
+
+          if (!this.dropAsSiblingValid && !this.dropAsChildValid) {
+            this.hideIndicator();
+            this.lastDropTarget = null;
+            return;
+          }
+
+          this.lastDropTargetRect = dropTarget.getBoundingClientRect();
+          this.dropNode = node;
+          this.updateIndicatorPos(x, y);
+        } else {
+          this.hideIndicator();
+        }
+      }
+    },
+
+    getDropTarget(x, y) {
+      this.dropOut = false;
+
       if (this.enableShadow && this.shadow) {
         this.shadow.style.display = "none";
       }
@@ -337,37 +367,9 @@ export default {
         if (node) {
           if (dropTarget == this.$refs.node) {
             dropTarget = null;
-          } else {
-            dropTarget = this.tree.isDropValidImpl(this.node, node)
-              ? dropTarget
-              : null;
-          }
-        }
-      }
-      if (dropTarget == this.lastDropTarget) {
-        if (!this.dropOut) {
-          this.updateIndicatorPos(x, y);
-        }
-      } else {
-        this.lastDropTarget = dropTarget;
-        if (dropTarget != null) {
-          this.lastDropTargetRect = dropTarget.getBoundingClientRect();
-          if (!this.dropOut) {
-            this.updateIndicatorPos(x, y);
-          }
-
-          if (this.dropOut) {
-            this.shouldShowIndicator = false;
-          } else {
-            let node = this.node.store.getNode(dropTarget.id);
-            this.dropNode = node;
-            this.shouldShowIndicator = this.tree.shouldShowDragIndicatorImpl(
-              node
-            );
           }
         } else {
-          this.lastDropTarget = null;
-          this.hideIndicator();
+          dropTarget = null;
         }
       }
       return dropTarget;
@@ -393,19 +395,18 @@ export default {
     },
 
     showIndicator() {
+      if (!this.indicator) {
+        this.addIndicator();
+      }
       this.indicator.style.display = "block";
     },
 
-    updateIndicator(x, y) {
-      if (this.shouldShowIndicator) {
-        this.showIndicator();
-        Object.assign(this.indicator.style, {
-          left: x + 35 + "px",
-          top: y - 1 + "px"
-        });
-      } else {
-        this.hideIndicator();
-      }
+    updateIndicatorPosImpl(x, y) {
+      this.showIndicator();
+      Object.assign(this.indicator.style, {
+        left: x + 35 + "px",
+        top: y - 1 + "px"
+      });
     },
 
     removeIndicator() {
@@ -433,24 +434,25 @@ export default {
         );
       }
 
-      if (this.tree.isAddChildValidImpl(this.node, this.dropNode)) {
-        let indent = this.tree.indent;
-        if (x - x1 > indent) {
-          contentPadding += indent;
-          this.dropAsChild = true;
-          let firstChild = this.lastDropTarget.firstChild;
-          let rect = firstChild.getBoundingClientRect();
-          y2 = rect.top + rect.height;
-        } else {
-          this.dropAsChild = false;
-        }
+      let indent = this.tree.indent;
+      if (x - x1 > indent && this.dropAsChildValid) {
+        contentPadding += indent;
+        this.dropAsChild = true;
+        let firstChild = this.lastDropTarget.firstChild;
+        let rect = firstChild.getBoundingClientRect();
+        y2 = rect.top + rect.height;
+        this.dropAsChild = true;
+      } else if (this.dropAsSiblingValid) {
+        this.dropAsChild = false;
+      } else {
+        return;
       }
 
       if (y < middle && !this.dropAsChild) {
-        this.updateIndicator(left + contentPadding, y1);
+        this.updateIndicatorPosImpl(left + contentPadding, y1);
         this.draggingInsertPos = "node-insert-before";
       } else {
-        this.updateIndicator(left + contentPadding, y2);
+        this.updateIndicatorPosImpl(left + contentPadding, y2);
         this.draggingInsertPos = "node-insert-after";
       }
     },
@@ -477,7 +479,12 @@ export default {
       if (this.lastDropTarget) {
         if (!this.dropOut) {
           let node = this.node.store.getNode(this.lastDropTarget.id);
-          this.tree.$emit(this.draggingInsertPos, this.node.data, node.data, this.dropAsChild);
+          this.tree.$emit(
+            this.draggingInsertPos,
+            this.node.data,
+            node.data,
+            this.dropAsChild
+          );
         } else {
           this.tree.$emit("node-drop-out", this.node.data);
         }
