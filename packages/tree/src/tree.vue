@@ -123,7 +123,7 @@ export default {
       default: null
     },
     shouldShowDragIndicator: {
-      default: null
+      default: false
     },
     enableShadow: {
       default: false

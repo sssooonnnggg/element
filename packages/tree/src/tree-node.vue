@@ -407,6 +407,9 @@ export default {
       if (!this.indicator) {
         this.addIndicator();
       }
+      if (!this.tree.shouldShowDragIndicator) {
+        return;
+      }
       this.indicator.style.display = "block";
     },
 
