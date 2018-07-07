@@ -291,11 +291,23 @@ export default {
         this.shadowInit = true;
         this.shadow.style.position = "fixed";
         this.shadow.style.z_index = 99999;
-        this.shadow.style.pointerEvents = 'none';
+        this.shadow.style.pointerEvents = "none";
       }
 
       let dropTarget = this.getDropTarget(e.clientX, e.clientY);
       this.updateIndicator(e.clientX, e.clientY, dropTarget);
+
+      if (this.expandTimer) {
+        clearTimeout(this.expandTimer);
+      }
+      if (dropTarget && !this.dropOut) {
+        this.expandTimer = setTimeout(() => {
+          let node = this.node.store.getNode(dropTarget.id);
+          if (node) {
+            node.expand();
+          }
+        }, 1000);
+      }
 
       if (this.enableShadow) {
         Object.assign(this.shadow.style, {
@@ -489,6 +501,11 @@ export default {
 
     handleMouseUp(e) {
       if (!this.draggable) return;
+
+      if (this.expandTimer) {
+        clearTimeout(this.expandTimer);
+      }
+
       this.releaseDragResource();
       e.stopPropagation();
       if (this.dropOut) {
