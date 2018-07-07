@@ -272,8 +272,10 @@ export default {
     },
 
     handleMouseMove(e) {
-
-      if (Math.abs(this.originDragPos.x - e.clientX) < 10 && Math.abs(this.originDragPos.y - e.clientY) < 10) {
+      if (
+        Math.abs(this.originDragPos.x - e.clientX) < 10 &&
+        Math.abs(this.originDragPos.y - e.clientY) < 10
+      ) {
         return;
       }
 
@@ -488,18 +490,18 @@ export default {
       if (!this.draggable) return;
       this.releaseDragResource();
       e.stopPropagation();
+      if (this.dropOut) {
+        this.tree.$emit("node-drop-out", this.node.data);
+        return;
+      }
       if (this.lastDropTarget) {
-        if (!this.dropOut) {
-          let node = this.node.store.getNode(this.lastDropTarget.id);
-          this.tree.$emit(
-            this.draggingInsertPos,
-            this.node.data,
-            node.data,
-            this.dropAsChild
-          );
-        } else {
-          this.tree.$emit("node-drop-out", this.node.data);
-        }
+        let node = this.node.store.getNode(this.lastDropTarget.id);
+        this.tree.$emit(
+          this.draggingInsertPos,
+          this.node.data,
+          node.data,
+          this.dropAsChild
+        );
       }
       //console.log("mouse_up");
     },
