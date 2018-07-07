@@ -291,6 +291,7 @@ export default {
         this.shadowInit = true;
         this.shadow.style.position = "fixed";
         this.shadow.style.z_index = 99999;
+        this.shadow.style.pointerEvents = 'none';
       }
 
       let dropTarget = this.getDropTarget(e.clientX, e.clientY);
