@@ -244,6 +244,7 @@ export default {
 
     handleMouseDown(e) {
       if (!this.draggable) return;
+      if (e.which != 1) return;
       let node = this.$refs.node;
 
       if (!this.tree.isDragValidImpl(this.node)) {
@@ -501,6 +502,10 @@ export default {
 
     handleMouseUp(e) {
       if (!this.draggable) return;
+      if (e.which == 3) {
+        this.releaseDragResource();
+        return;
+      }
 
       if (this.expandTimer) {
         clearTimeout(this.expandTimer);
