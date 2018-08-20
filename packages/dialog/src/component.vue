@@ -14,6 +14,7 @@
         <slot name="title">
           <span class="el-dialog__title">{{title}}</span>
         </slot>
+        <slot name="paste"></slot>
         <button type="button"
           class="el-dialog__headerbtn"
           aria-label="Close"

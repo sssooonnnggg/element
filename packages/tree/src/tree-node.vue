@@ -225,20 +225,118 @@ export default {
       this.indeterminate = indeterminate;
     },
 
-    setCurrentNode() {
+    setCurrentNode(event_type) {
       const store = this.tree.store;
-      if (store.currentNode == this.node) return;
-      if (store.currentNode != undefined) store.currentNode.isCurrent = false;
-      this.tree.currentNode = this;
-      this.node.isCurrent = true;
-      store.setCurrentNode(this.node);
-      this.tree.$emit(
-        "current-change",
-        store.currentNode ? store.currentNode.data : null,
-        store.currentNode
-      );
+      this.selectStatus();
+      if (event_type == "click") return;
       if (this.tree.expandOnClickNode) {
         this.handleExpandIconClick();
+      }
+    },
+
+    //判断菜单的选中取消状态
+    selectStatus() {
+      const store = this.tree.store;
+      if (!this.node) return;
+      if (window.event.ctrlKey && this.tree.multiSelect) {
+        //多选
+        let currentNodes = this.tree.store.currentNode || [];
+        let pos = currentNodes.indexOf(this.node);
+        if (pos >= 0) {
+          //取消菜单
+          this.node.isCurrent = false;
+          this.deleteTreeCurrentNode(this);
+          this.deleteTreeStoreCurrentNode(this.node);
+          this.unSelectChildNode(this.node); //有子菜单----取消所有子菜单选中状态
+        } else {
+          //选中菜单
+          this.node.isCurrent = true;
+          this.addTreeCurrentNode(this);
+          this.addTreeStoreCurrentNode(this.node);
+          this.unSelectParentNode(this.node); //菜单选中----取消所有父菜单选中状态
+          this.unSelectChildNode(this.node); //有子菜单----取消所有子菜单选中状态
+        }
+      } else {
+        //单选
+        if (store.currentNode) {
+          for (let i = 0; i < store.currentNode.length; i++) {
+            store.currentNode[i].isCurrent = false;
+          }
+          store.currentNode = [];
+          this.tree.currentNode = [];
+        }
+        this.node.isCurrent = true;
+        this.addTreeCurrentNode(this);
+        this.addTreeStoreCurrentNode(this.node);
+	  }
+	  this.tree.$emit('current-change', store.currentNode);
+    },
+
+    //添加Tree Store CurrentNode
+    addTreeStoreCurrentNode(node) {
+      const store = this.tree.store;
+      store.currentNode = store.currentNode || [];
+      if (store.currentNode.indexOf(node) < 0) {
+        store.currentNode.push(node);
+      }
+    },
+
+    //删除Tree Store CurrentNode
+    deleteTreeStoreCurrentNode(node) {
+      const store = this.tree.store;
+      store.currentNode = store.currentNode || [];
+      let pos = store.currentNode.indexOf(node);
+      if (pos >= 0) {
+        store.currentNode.splice(pos, 1);
+      }
+    },
+
+    //添加Tree CurrentNode
+    addTreeCurrentNode(obj) {
+      this.tree.currentNode = this.tree.currentNode || [];
+      if (this.tree.currentNode.indexOf(obj) < 0) {
+        this.tree.currentNode.push(obj);
+      }
+    },
+
+    //删除Tree CurrentNode
+    deleteTreeCurrentNode(obj) {
+      this.tree.currentNode = this.tree.currentNode || [];
+      let pos = this.tree.currentNode.indexOf(obj);
+      if (pos >= 0) {
+        this.tree.currentNode.splice(pos, 1);
+      }
+    },
+
+    //选中父节点取消他的子节点
+    unSelectChildNode(node) {
+      const store = this.tree.store;
+      if (node.childNodes && node.childNodes.length > 0) {
+        for (let i = 0; i < node.childNodes.length; i++) {
+          let child = node.childNodes[i];
+          let pos = store.currentNode.indexOf(child);
+          child.isCurrent = false;
+          this.deleteTreeCurrentNode(this.tree.currentNode[pos]);
+          this.deleteTreeStoreCurrentNode(child);
+          this.unSelectChildNode(child);
+        }
+      }
+    },
+
+    //选中子节点取消他的父节点
+    unSelectParentNode(node) {
+      const store = this.tree.store;
+      if (node.parent) {
+        let isCurrent = node.parent.isCurrent;
+        if (isCurrent) {
+          let parent = node.parent;
+          let pos = store.currentNode.indexOf(parent);
+          parent.isCurrent = false;
+          this.deleteTreeCurrentNode(this.tree.currentNode[pos]);
+          this.deleteTreeStoreCurrentNode(parent);
+        } else {
+          this.unSelectParentNode(node.parent);
+        }
       }
     },
 
@@ -250,7 +348,6 @@ export default {
       if (!this.tree.isDragValidImpl(this.node)) {
         return;
       }
-
       this.dragTarget = node;
       this._handleMouseMove = this.handleMouseMove.bind(this);
       this._handleMouseUp = this.handleMouseUp.bind(this);
@@ -387,6 +484,7 @@ export default {
       if (!this.dropOut && dropTarget && this.$refs.node.contains(dropTarget)) {
         dropTarget = null;
       }
+
       if (!this.dropOut && dropTarget) {
         let node = this.node.store.getNode(dropTarget.id);
         if (node) {
@@ -501,6 +599,7 @@ export default {
     },
 
     handleMouseUp(e) {
+      const store = this.tree.store;
       if (!this.draggable) return;
       if (e.which == 3) {
         this.releaseDragResource();
@@ -516,16 +615,44 @@ export default {
       if (this.dropOut) {
         this.tree.$emit("node-drop-out", this.node.data);
         return;
-      }
+	  }
+
       if (this.lastDropTarget) {
         let node = this.node.store.getNode(this.lastDropTarget.id);
-        this.tree.$emit(
-          this.draggingInsertPos,
-          this.node.data,
-          node.data,
-          this.dropAsChild
-        );
+		let treeStoreCurrentNode = store.currentNode || [], _arr = [];
+        if (node) {
+          if (treeStoreCurrentNode.indexOf(this.node) >= 0) {
+            for (let i = 0; i < store.currentNode.length; i++) {
+              _arr.push(store.currentNode[i].data);
+            }
+          } else {
+            _arr.push(this.node.data);
+          }
+		  this.clearAllNodeData();
+		  
+          this.tree.$emit(
+            this.draggingInsertPos,
+            _arr,
+            node.data,
+            this.dropAsChild
+		  );
+
+          console.log(
+            this.draggingInsertPos,
+            _arr,
+            node.data,
+            this.dropAsChild
+		  );
+		  
+        }
+        /* this.tree.$emit(
+              this.draggingInsertPos,
+              this.node.data,
+              node.data,
+              this.dropAsChild
+        ); */
       }
+      this.lastDropTarget = null;
       //console.log("mouse_up");
     },
 
@@ -545,35 +672,77 @@ export default {
       document.removeEventListener("keydown", this._handleKeyDown);
     },
 
+    //完成后清空所有存储数据
+    clearAllNodeData() {
+	  let store = this.tree.store;
+	  if(store.currentNode){
+		for (let i = 0; i < store.currentNode.length; i++) {
+			store.currentNode[i].isCurrent = false;
+		}
+	  }
+      this.tree.store.currentNode = [];
+      this.tree.currentNode = [];
+    },
+
     handleClick() {
-      this.setCurrentNode();
-      this.tree.$emit("node-click", this.node.data, this.node, this);
+      this.setCurrentNode("click");
+      this.tree.$emit(
+        "node-click",
+        this.node.data,
+        this.node,
+        this,
+        this.tree.store.currentNode
+      );
     },
 
     handleDoubleClick() {
-      this.setCurrentNode();
-      this.tree.$emit("node-double-click", this.node.data, this.node, this);
+      this.setCurrentNode("double-click");
+      this.tree.$emit(
+        "node-double-click",
+        this.node.data,
+        this.node,
+        this,
+        this.tree.store.currentNode
+      );
     },
 
     handleRightClick(event) {
-      this.setCurrentNode();
+      event.preventDefault();
+      let currentNode = this.tree.store.currentNode || [];
+      let pos = currentNode.indexOf(this.node);
+      if (pos < 0) {
+        this.setCurrentNode();
+      }
       this.tree.$emit(
         "node-right-click",
         event,
         this.node.data,
         this.node,
-        this
+        this,
+        this.tree.store.currentNode
       );
     },
 
     handleExpandIconClick() {
       if (this.node.isLeaf) return;
       if (this.expanded) {
-        this.tree.$emit("node-collapse", this.node.data, this.node, this);
+        this.tree.$emit(
+          "node-collapse",
+          this.node.data,
+          this.node,
+          this,
+          this.tree.store.currentNode
+        );
         this.node.collapse();
       } else {
         this.node.expand();
-        this.$emit("node-expand", this.node.data, this.node, this);
+        this.$emit(
+          "node-expand",
+          this.node.data,
+          this.node,
+          this,
+          this.tree.store.currentNode
+        );
       }
     },
 
@@ -638,20 +807,19 @@ export default {
   }
 };
 </script>
-<<style>
+<style>
 .el-tree-node-disabled {
   opacity: 0.5;
 }
 .el-tree-node-invalid {
-  background-color:rgba(100, 0, 0, 1);
+  background-color: rgba(100, 0, 0, 1);
 }
 
 .combine-line {
-  position:absolute;
-  top:0;
-  bottom:0;
-  left:0;
-  right:0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
-
 </style>

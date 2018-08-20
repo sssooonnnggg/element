@@ -125,7 +125,7 @@
         console.log(data, checked, indeterminate);
       },
       handleNodeClick(data) {
-        console.log(data);
+        
       },
       loadNode(node, resolve) {
         if (node.level === 0) {
@@ -281,7 +281,7 @@ Basic tree structure.
     },
     methods: {
       handleNodeClick(data) {
-        console.log(data);
+        
       }
     }
   };
@@ -325,7 +325,7 @@ Used for node selection. In the following example, data for each layer is acquir
         console.log(data, checked, indeterminate);
       },
       handleNodeClick(data) {
-        console.log(data);
+        
       },
       loadNode(node, resolve) {
         if (node.level === 0) {
@@ -756,7 +756,7 @@ Only one node among the same level can be expanded at one time.
     },
     methods: {
       handleNodeClick(data) {
-        console.log(data);
+        
       }
     }
   };

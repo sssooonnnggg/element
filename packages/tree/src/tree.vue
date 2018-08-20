@@ -133,6 +133,10 @@ export default {
     },
     useCustomExpandIcon: {
       default: false
+    },
+    multiSelect: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -204,7 +208,12 @@ export default {
     },
     setChecked(data, checked, deep) {
       this.store.setChecked(data, checked, deep);
+	},
+    /*新增获取选中节点方法 START*/
+    getCurrentNodes(){
+		return this.store.getCurrentNode();
     },
+	/*END*/
     handleNodeExpand(nodeData, node, instance) {
       this.broadcast("ElTreeNode", "tree-node-expand", node);
       this.$emit("node-expand", nodeData, node, instance);
@@ -213,12 +222,18 @@ export default {
       const node = this.store.getNode(data);
       if (node) {
         const store = this.store;
-        if (store.currentNode != undefined) store.currentNode.isCurrent = false;
-        node.isCurrent = true;
-        store.setCurrentNode(node);
+        if (store.currentNode != undefined && store.currentNode.length) {
+			for(let i=0; i<store.currentNode.length; i++){
+				store.currentNode[i].isCurrent = false
+			}
+		};
+		node.isCurrent = true;
+		store.currentNode = [];
+		store.currentNode.push(node);
+        //store.setCurrentNode(node);
         this.$emit(
           "current-change",
-          store.currentNode ? store.currentNode.data : null,
+          //store.currentNode ? store.currentNode.data : null,
           store.currentNode
         );
         node.expandParent();

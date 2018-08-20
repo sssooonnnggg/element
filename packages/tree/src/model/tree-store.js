@@ -289,13 +289,19 @@ export default class TreeStore {
   }
 
   setCurrentNode(node) {
-    this.currentNode = node;
+    this.currentNode = this.currentNode || [];
+    if (this.currentNode.indexOf(node) < 0) {
+			this.currentNode.push(node);
+    }
   }
 
   setCurrentNodeKey(key) {
     const node = this.getNode(key);
-    if (node) {
-      this.currentNode = node;
+    if (!node) return;
+    this.currentNode = this.currentNode || [];
+    if (node && this.currentNode.indexOf(node) < 0) {
+      this.currentNode.push(node);
     }
   }
+
 };

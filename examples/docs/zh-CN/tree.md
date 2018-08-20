@@ -134,7 +134,7 @@
         console.log(data, checked, indeterminate);
       },
       handleNodeClick(data) {
-        console.log(data);
+        
       },
       loadNode(node, resolve) {
         if (node.level === 0) {
@@ -186,6 +186,9 @@
       setCheckedKeys() {
         this.$refs.tree.setCheckedKeys([3]);
       },
+      getCurrentNodes(){
+        console.log(this.$refs.simpleTree.getCurrentNodes());
+      },
       resetChecked() {
         this.$refs.tree.setCheckedKeys([]);
       },
@@ -219,7 +222,7 @@
     data() {
       return {
         isDragValid: (data) => {
-          console.log(data);
+          
           return true;
         },
         enableShadow:true,
@@ -247,8 +250,14 @@
 ::: demo
 
 ```html
-<el-tree :data="data" node-key="label" :draggable="true" :props="defaultProps" @node-click="handleNodeClick" :indent='40' :is-drag-valid="isDragValid" :enable-shadow="enableShadow"></el-tree>
-
+<el-tree :data="data" node-key="label" :draggable="true" ref="simpleTree" :props="defaultProps" @node-click="handleNodeClick" :indent='40' :is-drag-valid="isDragValid" :enable-shadow="enableShadow"></el-tree>
+<div class="buttons">
+  <el-button @click="getCurrentNodes">获取当前选中的菜单</el-button><!-- 
+  <el-button @click="getCheckedKeys">通过 key 获取</el-button>
+  <el-button @click="setCheckedNodes">通过 node 设置</el-button>
+  <el-button @click="setCheckedKeys">通过 key 设置</el-button>
+  <el-button @click="resetChecked">清空</el-button> -->
+</div>
 <script>
   export default {
     
@@ -346,7 +355,7 @@
         console.log(data, checked, indeterminate);
       },
       handleNodeClick(data) {
-        console.log(data);
+        
       },
       loadNode(node, resolve) {
         if (node.level === 0) {
@@ -790,7 +799,7 @@
     },
     methods: {
       handleNodeClick(data) {
-        console.log(data);
+        //console.log(data);
       }
     }
   };

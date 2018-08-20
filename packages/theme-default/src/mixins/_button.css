@@ -3,8 +3,7 @@
   background-color: $background-color;
   border-color: $border-color;
 
-  &:hover,
-  &:focus {
+  &:hover {
     background: tint($background-color, var(--button-hover-tint-percent));
     border-color: tint($border-color, var(--button-hover-tint-percent));
     color: $color;
@@ -28,8 +27,7 @@
     border: var(--border-base);
     color: var(--button-default-color);
 
-    &:hover,
-    &:focus {
+    &:hover{
       background: var(--color-white);
       border-color: $border-color;
       color: $background-color;

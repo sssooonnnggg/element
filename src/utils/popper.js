@@ -528,11 +528,18 @@
             // if the popper is fixed we don't have to substract scrolling from the boundaries
             var scrollTop = data.offsets.popper.position === 'fixed' ? 0 : getScrollTopValue(scrollParent);
             var scrollLeft = data.offsets.popper.position === 'fixed' ? 0 : getScrollLeftValue(scrollParent);
-
-            boundaries = {
+            
+            //编辑器中root.document.documentElement.clientHeight永远是固定值BUG
+            /* boundaries = {
                 top: 0 - (offsetParentRect.top - scrollTop),
                 right: root.document.documentElement.clientWidth - (offsetParentRect.left - scrollLeft),
                 bottom: root.document.documentElement.clientHeight - (offsetParentRect.top - scrollTop),
+                left: 0 - (offsetParentRect.left - scrollLeft)
+            }; */
+            boundaries = {
+                top: 0 - (offsetParentRect.top - scrollTop),
+                right: root.document.body.clientWidth - (offsetParentRect.left - scrollLeft),
+                bottom: root.document.body.clientHeight - (offsetParentRect.top - scrollTop),
                 left: 0 - (offsetParentRect.left - scrollLeft)
             };
         } else {
