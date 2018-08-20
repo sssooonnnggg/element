@@ -209,7 +209,7 @@ export default {
       this.broadcast("ElTreeNode", "tree-node-expand", node);
       this.$emit("node-expand", nodeData, node, instance);
     },
-    selectNode(data) {
+    /* selectNode(data) {
       const node = this.store.getNode(data);
       if (node) {
         const store = this.store;
@@ -222,6 +222,31 @@ export default {
           store.currentNode
         );
         node.expandParent();
+      }
+    }, */
+    selectNode(data) {
+      const store = this.store;      
+      if(!data){
+        if (store.currentNode != undefined) store.currentNode.isCurrent = false;   
+        store.setCurrentNode(null);  
+        this.$emit(
+          "current-change",
+          store.currentNode ? store.currentNode.data : null,
+          store.currentNode
+        );           
+      }else{
+        const node = this.store.getNode(data);
+        if (node) {
+          if (store.currentNode != undefined) store.currentNode.isCurrent = false;          
+          node.isCurrent = true;
+          store.setCurrentNode(node);
+          this.$emit(
+            "current-change",
+            store.currentNode ? store.currentNode.data : null,
+            store.currentNode
+          );
+          node.expandParent();
+        }
       }
     },
     //加了一个方法，用于排序孩子，主要是为了解决sort数组控件没有表现的bug
