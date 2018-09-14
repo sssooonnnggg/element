@@ -139,12 +139,7 @@ export default {
   },
 
   created() {
-    this.t = this.top || 200;
-    this.l = this.left || -1;
-    this.w = this.width ? this.width : this.w;
-    this.h = this.height;
-    this.minW = this.width ? this.width : this.minW;
-    this.minH = this.height;
+    this.updataPosition();
   },
 
   mounted() {
@@ -170,9 +165,21 @@ export default {
         this.$emit("close");
       }
     },
-    height(newHeight) {
+    /* height(newHeight) {
       this.minH = newHeight;
       this.h = newHeight;
+    } */
+    height(){
+      this.updataPosition();
+    },
+    top(){
+      this.updataPosition();
+    },
+    left(){
+      this.updataPosition();
+    },
+    width(){
+      this.updataPosition();
     }
   },
 
@@ -203,6 +210,16 @@ export default {
   },
 
   methods: {
+    //by shenzuomin 2018.09.14 主要是解决动态改变弹框位置
+    updataPosition(){
+      this.t = this.top || 200;
+      this.l = this.left || -1;
+      this.w = this.width ? this.width : this.w;
+      this.h = this.height;
+      this.minW = this.width ? this.width : this.minW;
+      this.minH = this.height;
+    },
+
     centerDialog() {
       let dialog = this.$refs.dialog;
       let parent = document.documentElement;
