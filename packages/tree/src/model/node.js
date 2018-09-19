@@ -506,6 +506,15 @@ export default class Node {
     this.updateLeafState();
   }
 
+  //加了一个方法，用于排序孩子，主要是为了解决sort数组控件没有表现的bug
+  sortChildren(cmp) {
+    if (this.childNodes) {
+      this.childNodes.sort((node1, node2) => {
+        return cmp(node1.data, node2.data);
+      });
+    }
+  }
+
   loadData(callback, defaultProps = {}) {
     if (
       this.store.lazy === true &&

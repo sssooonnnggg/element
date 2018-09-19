@@ -224,6 +224,14 @@ export default {
         node.expandParent();
       }
     },
+    //加了一个方法，用于排序孩子，主要是为了解决sort数组控件没有表现的bug
+    sortChildren(data, cmp) {
+      const node = this.store.getNode(data);
+      if (node && data.children) {
+        data.children.sort(cmp);
+        node.sortChildren(cmp);
+      }
+    },
     collapseAllNode(data) {
       const node = this.store.getNode(data);
       if (node) {
