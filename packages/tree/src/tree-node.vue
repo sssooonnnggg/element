@@ -540,9 +540,9 @@ export default {
         this.removeIndicator();
       }
 
-      document.removeEventListener("mousemove", this._handleMouseMove);
-      document.removeEventListener("mouseup", this._handleMouseUp);
-      document.removeEventListener("keydown", this._handleKeyDown);
+      document.removeEventListener("mousemove", this._handleMouseMove, true);
+      document.removeEventListener("mouseup", this._handleMouseUp, true);
+      document.removeEventListener("keydown", this._handleKeyDown, true);
     },
 
     handleClick() {
