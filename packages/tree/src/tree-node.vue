@@ -501,9 +501,14 @@ export default {
     },
 
     handleMouseUp(e) {
+      let clearCache = () => {
+        this.lastDropTarget = null;
+        this.dropOut = false;
+      }
       if (!this.draggable) return;
       if (e.which == 3) {
         this.releaseDragResource();
+        clearCache();
         return;
       }
 
@@ -515,6 +520,7 @@ export default {
       e.stopPropagation();
       if (this.dropOut) {
         this.tree.$emit("node-drop-out", this.node.data);
+        clearCache();
         return;
       }
       if (this.lastDropTarget) {
@@ -525,6 +531,7 @@ export default {
           node.data,
           this.dropAsChild
         );
+        clearCache();
       }
       //console.log("mouse_up");
     },
