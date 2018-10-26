@@ -255,9 +255,9 @@ export default {
       this._handleMouseMove = this.handleMouseMove.bind(this);
       this._handleMouseUp = this.handleMouseUp.bind(this);
       this._handleKeyDown = this.handleKeyDown.bind(this);
-      document.addEventListener("mousemove", this._handleMouseMove);
-      document.addEventListener("mouseup", this._handleMouseUp);
-      document.addEventListener("keydown", this._handleKeyDown);
+      document.addEventListener("mousemove", this._handleMouseMove, true);
+      document.addEventListener("mouseup", this._handleMouseUp, true);
+      document.addEventListener("keydown", this._handleKeyDown, true);
       e.stopPropagation();
       this.originDragPos = {
         x: e.clientX,
