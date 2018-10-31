@@ -189,6 +189,9 @@
       getCurrentNodes(){
         console.log(this.$refs.simpleTree.getCurrentNodes());
       },
+      selectNode(){
+        this.$refs.simpleTree.selectNode();
+      },
       resetChecked() {
         this.$refs.tree.setCheckedKeys([]);
       },
@@ -252,7 +255,9 @@
 ```html
 <el-tree :data="data" node-key="label" :draggable="true" ref="simpleTree" :props="defaultProps" @node-click="handleNodeClick" :indent='40' :is-drag-valid="isDragValid" :enable-shadow="enableShadow"></el-tree>
 <div class="buttons">
-  <el-button @click="getCurrentNodes">获取当前选中的菜单</el-button><!-- 
+  <el-button @click="getCurrentNodes">获取当前选中的菜单</el-button>
+  <el-button @click="selectNode">选中菜单</el-button>
+  <!-- 
   <el-button @click="getCheckedKeys">通过 key 获取</el-button>
   <el-button @click="setCheckedNodes">通过 node 设置</el-button>
   <el-button @click="setCheckedKeys">通过 key 设置</el-button>

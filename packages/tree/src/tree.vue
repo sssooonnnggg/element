@@ -208,38 +208,51 @@ export default {
     },
     setChecked(data, checked, deep) {
       this.store.setChecked(data, checked, deep);
-	},
-    /*新增获取选中节点方法 START*/
-    getCurrentNodes(){
-		return this.store.getCurrentNode();
     },
-	/*END*/
+    /*新增获取选中节点方法 START*/
+    getCurrentNodes() {
+      return this.store.getCurrentNode();
+    },
+    /*END*/
     handleNodeExpand(nodeData, node, instance) {
       this.broadcast("ElTreeNode", "tree-node-expand", node);
       this.$emit("node-expand", nodeData, node, instance);
     },
-    /* selectNode(data) {
-      const node = this.store.getNode(data);
-      if (node) {
-        const store = this.store;
-        if (store.currentNode != undefined && store.currentNode.length) {
-			for(let i=0; i<store.currentNode.length; i++){
-				store.currentNode[i].isCurrent = false
-			}
-		};
-		node.isCurrent = true;
-		store.currentNode = [];
-		store.currentNode.push(node);
-        //store.setCurrentNode(node);
-        this.$emit(
-          "current-change",
-          //store.currentNode ? store.currentNode.data : null,
-          store.currentNode
-        );
-        node.expandParent();
-      }
-    }, */
     selectNode(data) {
+      let arr = [];
+      let store = this.store;
+      let node = store.getNode(data);
+
+      let unselectNodes = (store) => {
+        if (store.currentNode != undefined && store.currentNode.length) {
+          for (let i = 0; i < store.currentNode.length; i++) {
+            store.currentNode[i].isCurrent = false;
+          }
+        }
+        store.currentNode = [];
+      }
+
+      if(data){
+        if (node) {
+          unselectNodes(store);
+          node.isCurrent = true;
+          store.setCurrentNode(node);
+          this.$emit(
+            "current-change",
+            [store.currentNode[0].data]
+          );
+          node.expandParent();
+        }
+      }else{
+          unselectNodes(store);
+          this.$emit(
+            "current-change",
+            null
+          );
+      }
+
+    },
+    /*  selectNode(data) {
       const store = this.store;      
       if(!data){
         if (store.currentNode != undefined) store.currentNode.isCurrent = false;   
@@ -263,7 +276,7 @@ export default {
           node.expandParent();
         }
       }
-    },
+    }, */
     //加了一个方法，用于排序孩子，主要是为了解决sort数组控件没有表现的bug
     sortChildren(data, cmp) {
       const node = this.store.getNode(data);

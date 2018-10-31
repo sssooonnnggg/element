@@ -285,7 +285,13 @@ export default class TreeStore {
   }
 
   getCurrentNode() {
-    return this.currentNode;
+    let arr = [], currentNode = this.currentNode;
+    if (currentNode && currentNode.length){
+      for(let i in currentNode){
+        arr.push(currentNode[i].data);
+      }
+    }
+    return arr;
   }
 
   setCurrentNode(node) {
