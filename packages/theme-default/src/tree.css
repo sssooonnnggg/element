@@ -101,3 +101,5 @@
 .el-tree--highlight-current .el-tree-node.is-current > .el-tree-node__content {
   background-color: color(var(--color-primary) tint(92%));
 }
+
+.__shadow_num{ border: 1px solid #ccc; background: #fff; padding: 3px 10px; border-radius: 5px; }

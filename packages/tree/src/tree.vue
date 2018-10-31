@@ -17,6 +17,11 @@
     </div>
   </div>
 </template>
+<style>
+.is-current {
+  background: #ff0000 !important;
+}
+</style>
 
 <script>
 import TreeStore from "./model/tree-store";

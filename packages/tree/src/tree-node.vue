@@ -379,12 +379,23 @@ export default {
 
       if (this.enableShadow && !this.shadowInit) {
         let target = this.dragTarget.firstChild;
+        console.log(this.node);
+        console.log(this.node.store.currentNode.length > 1);
+        let currentNode = this.node.store.currentNode;
         let rect = target.getBoundingClientRect();
-        this.targetPaddingLeft = parseInt(target.style.paddingLeft);
-        this.shadow = target.cloneNode(true);
-        this.shadow.style.background = "transparent";
-
-        this.shadow.id = this.shadow.id + "__shadow";
+        if(currentNode && currentNode.length > 1){
+          let blankDiv = document.createElement('div');
+          blankDiv.innerText = currentNode.length;
+          this.shadow = blankDiv;
+          this.shadow.className = "__shadow_num";
+          this.targetPaddingLeft = -20;
+        }else{
+          this.shadow = target.cloneNode(true);
+          console.log(target);
+          this.shadow.id = this.shadow.id + "__shadow";
+          this.shadow.style.background = "transparent";
+          this.targetPaddingLeft = parseInt(target.style.paddingLeft);
+        }
         document.body.appendChild(this.shadow);
         this.shadowInit = true;
         this.shadow.style.position = "fixed";
