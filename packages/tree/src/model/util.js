@@ -5,8 +5,8 @@ export const markNodeData = function(node, data) {
   Object.defineProperty(data, NODE_KEY, {
     value: node.id,
     enumerable: false,
-    configurable: false,
-    writable: false
+    //configurable: false,
+    //writable: false
   });
 };
 

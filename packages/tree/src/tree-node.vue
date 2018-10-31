@@ -352,9 +352,9 @@ export default {
       this._handleMouseMove = this.handleMouseMove.bind(this);
       this._handleMouseUp = this.handleMouseUp.bind(this);
       this._handleKeyDown = this.handleKeyDown.bind(this);
-      document.addEventListener("mousemove", this._handleMouseMove);
-      document.addEventListener("mouseup", this._handleMouseUp);
-      document.addEventListener("keydown", this._handleKeyDown);
+      document.addEventListener("mousemove", this._handleMouseMove, true);
+      document.addEventListener("mouseup", this._handleMouseUp, true);
+      document.addEventListener("keydown", this._handleKeyDown, true);
       e.stopPropagation();
       this.originDragPos = {
         x: e.clientX,
@@ -600,9 +600,14 @@ export default {
 
     handleMouseUp(e) {
       const store = this.tree.store;
+      let clearCache = () => {
+        this.lastDropTarget = null;
+        this.dropOut = false;
+      }
       if (!this.draggable) return;
       if (e.which == 3) {
         this.releaseDragResource();
+        clearCache();
         return;
       }
 
@@ -614,12 +619,13 @@ export default {
       e.stopPropagation();
       if (this.dropOut) {
         this.tree.$emit("node-drop-out", this.node.data);
+        clearCache();
         return;
 	  }
 
       if (this.lastDropTarget) {
         let node = this.node.store.getNode(this.lastDropTarget.id);
-		let treeStoreCurrentNode = store.currentNode || [], _arr = [];
+        let treeStoreCurrentNode = store.currentNode || [], _arr = [];
         if (node) {
           if (treeStoreCurrentNode.indexOf(this.node) >= 0) {
             for (let i = 0; i < store.currentNode.length; i++) {
@@ -628,22 +634,21 @@ export default {
           } else {
             _arr.push(this.node.data);
           }
-		  this.clearAllNodeData();
-		  
+          this.clearAllNodeData();
           this.tree.$emit(
             this.draggingInsertPos,
             _arr,
             node.data,
             this.dropAsChild
-		  );
+          );
 
           console.log(
             this.draggingInsertPos,
             _arr,
             node.data,
             this.dropAsChild
-		  );
-		  
+          );
+        
         }
         /* this.tree.$emit(
               this.draggingInsertPos,
@@ -653,6 +658,14 @@ export default {
         ); */
       }
       this.lastDropTarget = null;
+        this.tree.$emit(
+          this.draggingInsertPos,
+          this.node.data,
+          node.data,
+          this.dropAsChild
+        );
+        clearCache();
+      }
       //console.log("mouse_up");
     },
 
@@ -667,9 +680,9 @@ export default {
         this.removeIndicator();
       }
 
-      document.removeEventListener("mousemove", this._handleMouseMove);
-      document.removeEventListener("mouseup", this._handleMouseUp);
-      document.removeEventListener("keydown", this._handleKeyDown);
+      document.removeEventListener("mousemove", this._handleMouseMove, true);
+      document.removeEventListener("mouseup", this._handleMouseUp, true);
+      document.removeEventListener("keydown", this._handleKeyDown, true);
     },
 
     //完成后清空所有存储数据

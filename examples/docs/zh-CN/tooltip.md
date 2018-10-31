@@ -96,13 +96,13 @@
     </el-tooltip>
   </div>
   <div class="bottom">
-    <el-tooltip class="item" effect="dark" content="Bottom Left 提示文字" placement="bottom-start">
+    <el-tooltip class="item" effect="dark" content="Bottom Left " placement="bottom-start" :close-delay="0" transition="none">
       <el-button>下左</el-button>
     </el-tooltip>
-    <el-tooltip class="item" effect="dark" content="Bottom Center 提示文字" placement="bottom">
+    <el-tooltip class="item" effect="dark" content="Bottom Center 提示文字" placement="bottom" :close-delay="0" transition="none">
       <el-button>下边</el-button>
     </el-tooltip>
-    <el-tooltip class="item" effect="dark" content="Bottom Right 提示文字" placement="bottom-end">
+    <el-tooltip class="item" effect="dark" content="Bottom Right 提示文字" placement="bottom-end" :close-delay="0" transition="none">
       <el-button>下右</el-button>
     </el-tooltip>
   </div>
@@ -212,6 +212,7 @@ tooltip 内不支持 disabled form 元素，参考[MDN](https://developer.mozill
 |  visible-arrow   |  是否显示 Tooltip 箭头，更多参数可见[Vue-popper](https://github.com/element-component/vue-popper) | Boolean | — | true |
 |  popper-options        | [popper.js](https://popper.js.org/documentation.html) 的参数 | Object            | 参考 [popper.js](https://popper.js.org/documentation.html) 文档 | { boundariesElement: 'body', gpuAcceleration: false } |
 | open-delay | 延迟出现，单位毫秒 | Number | — | 0 |
+| close-delay | 延迟关闭，单位毫秒 | Number | — | 200 |
 | manual | 手动控制模式，设置为 true 后，mouseenter 和 mouseleave 事件将不会生效 | Boolean | — | false |
 | popper-class | 为 Tooltip 的 popper 添加类名 | String | — | — |
 | enterable | 鼠标是否可进入到 tooltip 中 | Boolean | — | true |

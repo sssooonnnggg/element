@@ -31,6 +31,10 @@ export default {
       type: Number,
       default: 0
     },
+    closeDelay: {
+      type: Number,
+      default: 200
+    },
     title: String,
     disabled: Boolean,
     content: String,
@@ -113,7 +117,7 @@ export default {
     handleMouseLeave() {
       this._timer = setTimeout(() => {
         this.showPopper = false;
-      }, 200);
+      }, this.closeDelay);
     },
     handleDocumentClick(e) {
       let reference = this.reference || this.$refs.reference;

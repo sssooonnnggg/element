@@ -222,7 +222,7 @@
     data() {
       return {
         isDragValid: (data) => {
-          
+          console.log(data, this.$refs.tree);
           return true;
         },
         enableShadow:true,

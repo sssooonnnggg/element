@@ -245,6 +245,8 @@ Popover 的属性与 Tooltip 很类似，它们都是基于`Vue-popper`开发的
 |  transition     |  定义渐变动画      | String             | — | fade-in-linear |
 |  visible-arrow   |  是否显示 Tooltip 箭头，更多参数可见[Vue-popper](https://github.com/element-component/vue-popper) | Boolean | — | true |
 |  popper-options        | [popper.js](https://popper.js.org/documentation.html) 的参数 | Object            | 参考 [popper.js](https://popper.js.org/documentation.html) 文档 | `{ boundariesElement: 'body', gpuAcceleration: false }` |
+| open-delay | 延迟出现，单位毫秒(只在trigger为hover时有效果) | Number | — | 0 |
+| close-delay | 延迟关闭，单位毫秒(只在trigger为hover时有效果) | Number | — | 200 |
 | popper-class | 为 popper 添加类名 | String | — | — |
 
 ### Slot
