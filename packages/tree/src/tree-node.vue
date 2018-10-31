@@ -599,73 +599,70 @@ export default {
     },
 
     handleMouseUp(e) {
-      const store = this.tree.store;
-      let clearCache = () => {
-        this.lastDropTarget = null;
-        this.dropOut = false;
-      }
-      if (!this.draggable) return;
-      if (e.which == 3) {
-        this.releaseDragResource();
-        clearCache();
-        return;
-      }
+		const store = this.tree.store;
+		let clearCache = () => {
+			this.lastDropTarget = null;
+			this.dropOut = false;
+		}
+		if (!this.draggable) return;
+		if (e.which == 3) {
+			this.releaseDragResource();
+			clearCache();
+			return;
+		}
 
-      if (this.expandTimer) {
-        clearTimeout(this.expandTimer);
-      }
+		if (this.expandTimer) {
+			clearTimeout(this.expandTimer);
+		}
 
-      this.releaseDragResource();
-      e.stopPropagation();
-      if (this.dropOut) {
-        this.tree.$emit("node-drop-out", this.node.data);
-        clearCache();
-        return;
-	  }
+		this.releaseDragResource();
+      	e.stopPropagation();
+		if (this.dropOut) {
+			this.tree.$emit("node-drop-out", this.node.data);
+			clearCache();
+			return;
+		}
 
-      if (this.lastDropTarget) {
-        let node = this.node.store.getNode(this.lastDropTarget.id);
-        let treeStoreCurrentNode = store.currentNode || [], _arr = [];
-        if (node) {
-          if (treeStoreCurrentNode.indexOf(this.node) >= 0) {
-            for (let i = 0; i < store.currentNode.length; i++) {
-              _arr.push(store.currentNode[i].data);
-            }
-          } else {
-            _arr.push(this.node.data);
-          }
-          this.clearAllNodeData();
-          this.tree.$emit(
-            this.draggingInsertPos,
-            _arr,
-            node.data,
-            this.dropAsChild
-          );
-
-          console.log(
-            this.draggingInsertPos,
-            _arr,
-            node.data,
-            this.dropAsChild
-          );
-        
-        }
-        /* this.tree.$emit(
-              this.draggingInsertPos,
-              this.node.data,
-              node.data,
-              this.dropAsChild
-        ); */
-      }
-      this.lastDropTarget = null;
-        this.tree.$emit(
-          this.draggingInsertPos,
-          this.node.data,
-          node.data,
-          this.dropAsChild
-        );
-        clearCache();
-      }
+		if (this.lastDropTarget) {
+			let node = this.node.store.getNode(this.lastDropTarget.id);
+			let treeStoreCurrentNode = store.currentNode || [], _arr = [];
+			if (node) {
+				if (treeStoreCurrentNode.indexOf(this.node) >= 0) {
+					for (let i = 0; i < store.currentNode.length; i++) {
+						_arr.push(store.currentNode[i].data);
+					}
+				} else {
+					_arr.push(this.node.data);
+				}
+				this.clearAllNodeData();
+				this.tree.$emit(
+					this.draggingInsertPos,
+					_arr,
+					node.data,
+					this.dropAsChild
+				);
+				console.log(
+					this.draggingInsertPos,
+					_arr,
+					node.data,
+					this.dropAsChild
+				);
+			}
+			/* this.tree.$emit(
+				this.draggingInsertPos,
+				this.node.data,
+				node.data,
+				this.dropAsChild
+			); */
+		}
+		this.lastDropTarget = null;
+		this.tree.$emit(
+			this.draggingInsertPos,
+			this.node.data,
+			node.data,
+			this.dropAsChild
+		);
+		clearCache();
       //console.log("mouse_up");
     },
 
@@ -687,12 +684,12 @@ export default {
 
     //完成后清空所有存储数据
     clearAllNodeData() {
-	  let store = this.tree.store;
-	  if(store.currentNode){
-		for (let i = 0; i < store.currentNode.length; i++) {
-			store.currentNode[i].isCurrent = false;
-		}
-	  }
+	    let store = this.tree.store;
+      if(store.currentNode){
+        for (let i = 0; i < store.currentNode.length; i++) {
+          store.currentNode[i].isCurrent = false;
+        }
+      }
       this.tree.store.currentNode = [];
       this.tree.currentNode = [];
     },
@@ -776,7 +773,6 @@ export default {
       this.tree.$emit("node-expand", nodeData, node, instance);
     }
   },
-
   created() {
     const parent = this.$parent;
 
@@ -818,7 +814,7 @@ export default {
       });
     }
   }
-};
+}
 </script>
 <style>
 .el-tree-node-disabled {
