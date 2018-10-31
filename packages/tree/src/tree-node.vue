@@ -654,15 +654,15 @@ export default {
 				node.data,
 				this.dropAsChild
 			); */
+			this.lastDropTarget = null;
+			this.tree.$emit(
+				this.draggingInsertPos,
+				this.node.data,
+				node.data,
+				this.dropAsChild
+			);
+			clearCache();
 		}
-		this.lastDropTarget = null;
-		this.tree.$emit(
-			this.draggingInsertPos,
-			this.node.data,
-			node.data,
-			this.dropAsChild
-		);
-		clearCache();
       //console.log("mouse_up");
     },
 
