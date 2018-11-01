@@ -379,8 +379,6 @@ export default {
 
       if (this.enableShadow && !this.shadowInit) {
         let target = this.dragTarget.firstChild;
-        console.log(this.node);
-        console.log(this.node.store.currentNode.length > 1);
         let currentNode = this.node.store.currentNode;
         let rect = target.getBoundingClientRect();
         if(currentNode && currentNode.length > 1){
@@ -391,7 +389,6 @@ export default {
           this.targetPaddingLeft = -20;
         }else{
           this.shadow = target.cloneNode(true);
-          console.log(target);
           this.shadow.id = this.shadow.id + "__shadow";
           this.shadow.style.background = "transparent";
           this.targetPaddingLeft = parseInt(target.style.paddingLeft);
@@ -404,6 +401,7 @@ export default {
       }
 
       let dropTarget = this.getDropTarget(e.clientX, e.clientY);
+      this.updateDropTargetStatus(dropTarget);
       this.updateIndicator(e.clientX, e.clientY, dropTarget);
 
       if (this.expandTimer) {
@@ -428,6 +426,67 @@ export default {
       e.stopPropagation();
     },
 
+    clearDropTargetStatus(dropStatus) {
+      if(dropStatus) { 
+        dropStatus.removeAttribute('data-status');
+      }
+    },
+
+    updateDropTargetStatus(dropStatus) {
+      if (this.dropOut) {
+        this.clearDropTargetStatus(dropStatus);
+        return;
+      }
+
+      if (dropStatus != this.lastDropStatus) {
+        this.clearDropTargetStatus(this.lastDropStatus);
+        this.lastDropStatus = dropStatus;
+      }
+
+      if(dropStatus) {
+        let dragNodes = this.tree.store.currentNode;
+        let node = this.node.store.getNode(dropStatus.id);
+        if (!this._isDropValid(dragNodes, node)) {
+          dropStatus.setAttribute('data-status', '0');
+        } else {
+          dropStatus.setAttribute('data-status', '1');
+        }
+      }
+    },
+
+    _isDropValid(dragNodes, targetNode) {
+      let nodes = dragNodes || [];
+      dragNodes = nodes.indexOf(this.node) >= 0 ? nodes : [ this.node ];
+      for (let i = 0; i < dragNodes.length; ++i) {
+        if (!this.tree.isDropValidImpl(dragNodes[i], targetNode)) {
+          return false;
+        }
+      }
+      return true;
+    },
+
+    _isAddChildValid(dragNodes, targetNode) {
+      let nodes = dragNodes || [];
+      dragNodes = nodes.indexOf(this.node) >= 0 ? nodes :  [ this.node ];
+      for (let i = 0; i < dragNodes.length; ++i) {
+        if (!this.tree.isAddChildValidImpl(dragNodes, targetNode)) {
+          return false;
+        }
+      }
+      return true;
+    },
+
+    _isDropOutValid(dragNodes, targetNode) {
+      let nodes = dragNodes || [];
+      dragNodes = nodes.indexOf(this.node) >= 0 ? nodes : [ this.node ];
+      for (let i = 0; i < dragNodes.length; ++i) {
+        if (!this.tree.isDropOutValidImpl(dragNodes, targetNode)) {
+          return false;
+        }
+      }
+      return false;
+    },
+
     updateIndicator(x, y, dropTarget) {
       if (!this.indicator) {
         this.addIndicator();
@@ -443,12 +502,15 @@ export default {
       } else {
         this.lastDropTarget = dropTarget;
         if (dropTarget != null) {
+          let dragNodes = this.tree.store.currentNode;
           let node = this.node.store.getNode(dropTarget.id);
-          this.dropAsSiblingValid = this.tree.isDropValidImpl(this.node, node);
-          this.dropAsChildValid = this.tree.isAddChildValidImpl(
-            this.node,
-            node
-          );
+          // this.dropAsSiblingValid = this.tree.isDropValidImpl(this.node, node);
+          // this.dropAsChildValid = this.tree.isAddChildValidImpl(
+          //   this.node,
+          //   node
+          // );
+          this.dropAsSiblingValid = this._isDropValid(dragNodes, node);
+          this.dropAsChildValid = this._isAddChildValid(dragNodes, node);
 
           if (!this.dropAsSiblingValid && !this.dropAsChildValid) {
             this.hideIndicator();
@@ -471,12 +533,14 @@ export default {
       if (this.enableShadow && this.shadow) {
         this.shadow.style.display = "none";
       }
-
+   
       let dropTarget = document.elementFromPoint(x, y);
       if (dropTarget && !this.tree.$refs.container.contains(dropTarget)) {
+        let dragNodes = this.tree.store.currentNode;
+        // this.tree.isDropOutValidImpl(this.node, dropTarget)
         if (
           dropTarget.className != "el-tree-node-drag-indicator" &&
-          this.tree.isDropOutValidImpl(this.node, dropTarget)
+          this._isDropOutValid(dragNodes, dropTarget)
         ) {
           this.dropOut = true;
         } else {
@@ -610,8 +674,10 @@ export default {
     },
 
     handleMouseUp(e) {
+      this.clearDropTargetStatus(this.lastDropStatus);
       const store = this.tree.store;
       let clearCache = () => {
+        this.lastDropStatus = null;
         this.lastDropTarget = null;
         this.dropOut = false;
       };
@@ -628,6 +694,11 @@ export default {
 
       this.releaseDragResource();
       e.stopPropagation();
+
+      const getSelectNodes = () => {
+
+      };
+
       if (this.dropOut) {
         let _arr = [];
         for (let i = 0; i < store.currentNode.length; i++) {

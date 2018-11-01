@@ -17,11 +17,6 @@
     </div>
   </div>
 </template>
-<style>
-.is-current {
-  background: #ff0000 !important;
-}
-</style>
 
 <script>
 import TreeStore from "./model/tree-store";
@@ -141,7 +136,7 @@ export default {
     },
     multiSelect: {
       type: Boolean,
-      default: true
+      default: false
     }
   },
 
