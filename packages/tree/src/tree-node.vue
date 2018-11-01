@@ -469,7 +469,7 @@ export default {
       let nodes = dragNodes || [];
       dragNodes = nodes.indexOf(this.node) >= 0 ? nodes :  [ this.node ];
       for (let i = 0; i < dragNodes.length; ++i) {
-        if (!this.tree.isAddChildValidImpl(dragNodes, targetNode)) {
+        if (!this.tree.isAddChildValidImpl(dragNodes[i], targetNode)) {
           return false;
         }
       }
@@ -480,11 +480,11 @@ export default {
       let nodes = dragNodes || [];
       dragNodes = nodes.indexOf(this.node) >= 0 ? nodes : [ this.node ];
       for (let i = 0; i < dragNodes.length; ++i) {
-        if (!this.tree.isDropOutValidImpl(dragNodes, targetNode)) {
+        if (!this.tree.isDropOutValidImpl(dragNodes[i], targetNode)) {
           return false;
         }
       }
-      return false;
+      return true;
     },
 
     updateIndicator(x, y, dropTarget) {
@@ -696,14 +696,21 @@ export default {
       e.stopPropagation();
 
       const getSelectNodes = () => {
-
+        let treeStoreCurrentNode = this.tree.store.currentNode || [];
+        let _arr = [];
+        //拖动对象是否为当前选中项中的一个
+        if (treeStoreCurrentNode.indexOf(this.node) >= 0) {
+          for (let i = 0; i < treeStoreCurrentNode.length; i++) {
+            _arr.push(treeStoreCurrentNode[i].data);
+          }
+        } else {
+          _arr.push(this.node.data);
+        }
+        return _arr;
       };
 
       if (this.dropOut) {
-        let _arr = [];
-        for (let i = 0; i < store.currentNode.length; i++) {
-          _arr.push(store.currentNode[i].data);
-        }
+        let _arr = getSelectNodes();
         this.tree.$emit("node-drop-out", _arr);
         clearCache();
         return;
@@ -711,17 +718,8 @@ export default {
 
       if (this.lastDropTarget) {
         let node = this.node.store.getNode(this.lastDropTarget.id);
-        let treeStoreCurrentNode = store.currentNode || [],
-          _arr = [];
         if (node) {
-          //拖动对象是否为当前选中项中的一个
-          if (treeStoreCurrentNode.indexOf(this.node) >= 0) {
-            for (let i = 0; i < store.currentNode.length; i++) {
-              _arr.push(store.currentNode[i].data);
-            }
-          } else {
-            _arr.push(this.node.data);
-          }
+          let _arr = getSelectNodes();
           this.clearAllNodeData();
           this.tree.$emit(
             this.draggingInsertPos,
@@ -729,29 +727,15 @@ export default {
             node.data,
             this.dropAsChild
           );
-          console.log(
-            this.draggingInsertPos,
-            _arr,
-            node.data,
-            this.dropAsChild
-          );
         }
-        /* this.tree.$emit(
-				this.draggingInsertPos,
-				this.node.data,
-				node.data,
-				this.dropAsChild
-			); */
-        this.lastDropTarget = null;
         /* this.tree.$emit(
           this.draggingInsertPos,
           this.node.data,
           node.data,
           this.dropAsChild
-        ); */
+			  ); */
         clearCache();
       }
-      //console.log("mouse_up");
     },
 
     releaseDragResource() {
