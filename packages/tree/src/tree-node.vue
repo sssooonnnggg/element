@@ -381,7 +381,7 @@ export default {
         let target = this.dragTarget.firstChild;
         let currentNode = this.node.store.currentNode;
         let rect = target.getBoundingClientRect();
-        if(currentNode && currentNode.length > 1){
+        if(currentNode && currentNode.length > 1 && currentNode.indexOf(this.node) >= 0){
           let blankDiv = document.createElement('div');
           blankDiv.innerText = currentNode.length;
           this.shadow = blankDiv;
