@@ -221,7 +221,6 @@ export default {
     selectNode(data) {
       let arr = [];
       let store = this.store;
-      let node = store.getNode(data);
 
       let unselectNodes = (store) => {
         if (store.currentNode != undefined && store.currentNode.length) {
@@ -233,6 +232,7 @@ export default {
       }
 
       if(data){
+        let node = store.getNode(data);
         if (node) {
           unselectNodes(store);
           node.isCurrent = true;
