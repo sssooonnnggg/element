@@ -236,6 +236,7 @@ export default {
         }
       }
       store.currentNode = [];
+      this.$emit("current-change",null);
     },
     selectNode(data) {
       let store = this.store;
@@ -259,8 +260,6 @@ export default {
           });
         }
         this.$emit("current-change",datas);
-      }else{
-        this.$emit("current-change",null);
       }
     },
     /*  selectNode(data) {
