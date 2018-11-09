@@ -218,39 +218,50 @@ export default {
       this.broadcast("ElTreeNode", "tree-node-expand", node);
       this.$emit("node-expand", nodeData, node, instance);
     },
-    selectNode(data) {
-      let arr = [];
+    _selectSingleNode (singleData) {//选中单个节点,不触发'current-change'事件
       let store = this.store;
-
-      let unselectNodes = (store) => {
-        if (store.currentNode != undefined && store.currentNode.length) {
-          for (let i = 0; i < store.currentNode.length; i++) {
-            store.currentNode[i].isCurrent = false;
-          }
-        }
-        store.currentNode = [];
+      let node = store.getNode(singleData);
+      if (node) {
+        node.isCurrent = true;
+        store.setCurrentNode(node);
+        node.expandParent();
       }
-
+      return node;
+    },
+    unselectNodes () {//新增取消选中所有的节点的方法
+      let store = this.store;
+      if (store.currentNode != undefined && store.currentNode.length) {
+        for (let i = 0; i < store.currentNode.length; i++) {
+          store.currentNode[i].isCurrent = false;
+        }
+      }
+      store.currentNode = [];
+    },
+    selectNode(data) {
+      let store = this.store;
+      this.unselectNodes();//先取消选中所有的节点
       if(data){
-        let node = store.getNode(data);
-        if (node) {
-          unselectNodes(store);
-          node.isCurrent = true;
-          store.setCurrentNode(node);
-          this.$emit(
-            "current-change",
-            [store.currentNode[0].data]
-          );
-          node.expandParent();
+        if(data instanceof Array){//如果是数组，表示选中多个
+          data.forEach(element => {
+            let node = this._selectSingleNode(element);
+            if(node){
+              // this.$refs.treeNode.unSelectParentNode(node); //菜单选中----取消所有父菜单选中状态
+              // this.$refs.treeNode.unSelectChildNode(node); //有子菜单----取消所有子菜单选中状态
+            }
+          });
+        }else{//否则选中单个
+          this._selectSingleNode(data);
         }
+        let datas = [];
+        if(store.currentNode){
+          store.currentNode.forEach(element => {
+            datas.push(element.data);
+          });
+        }
+        this.$emit("current-change",datas);
       }else{
-          unselectNodes(store);
-          this.$emit(
-            "current-change",
-            null
-          );
+        this.$emit("current-change",null);
       }
-
     },
     /*  selectNode(data) {
       const store = this.store;      

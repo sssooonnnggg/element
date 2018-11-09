@@ -190,7 +190,39 @@
         console.log(this.$refs.simpleTree.getCurrentNodes());
       },
       selectNode(){
-        this.$refs.simpleTree.selectNode();
+        /* this.$refs.simpleTree.selectNode({
+          label: '二级 2'
+        }); */
+        this.$refs.simpleTree.selectNode([{
+          label: '二级 2'
+        },{
+          label: '二级 3'
+        },{
+          label: '一级 2sfasfas',
+          children: [{
+            label: '二级 2-1',
+            hiddenSelf:true,
+            children: [{
+              label: '三级 1',
+              children:[{
+                label: 'jljljl'
+              },{
+                label: 'aaaaaa'
+              }]
+            },{
+              label: '二级 2'
+            },{
+              label: '二级 3'
+            },{
+              label: '二级 4'
+            }]
+          }, {
+            label: '二级 2-2',
+            children: [{
+              label: '三级 2-2-1'
+            }]
+          }]
+        }]);
       },
       resetChecked() {
         this.$refs.tree.setCheckedKeys([]);
@@ -253,7 +285,8 @@
 ::: demo
 
 ```html
-<el-tree :data="data" node-key="label" :draggable="true" ref="simpleTree" :props="defaultProps" @node-click="handleNodeClick" :indent='40' :is-drag-valid="isDragValid" :enable-shadow="enableShadow"></el-tree>
+<el-tree :data="data" node-key="label" :draggable="true" ref="simpleTree" :props="defaultProps" @node-click="handleNodeClick" :indent='40' :is-drag-valid="isDragValid" 
+:highlight-current="true" :multi-select="true" :enable-shadow="enableShadow"></el-tree>
 <div class="buttons">
   <el-button @click="getCurrentNodes">获取当前选中的菜单</el-button>
   <el-button @click="selectNode">选中菜单</el-button>
