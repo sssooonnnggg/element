@@ -31,6 +31,7 @@
         v-if="$slots.footer">
         <slot name="footer"></slot>
       </div>
+      <template v-if="resizable">
       <div class='el-dialog__resizer corner bottom-right'
         @mousedown='handleResizerMouseDown($event, false, false)'>
       </div>
@@ -55,6 +56,7 @@
       <div class='el-dialog__resizer sider right'
         @mousedown='handleResizerMouseDown($event, false, false, true, false)'>
       </div>
+      </template>
     </div>
   </div>
 </template>
