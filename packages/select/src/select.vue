@@ -205,6 +205,10 @@ export default {
       type: Number,
       default: 0
     },
+    mousewheel: {
+      type: Boolean,
+      default: true
+    },
     placeholder: {
       type: String,
       default() {
@@ -488,17 +492,19 @@ export default {
     },
 
     handleMouseWheel(event) {
-      let scrolldown = event.deltaY > 0;
-      let currentIndex = this.options.findIndex(option => option.value == this.value);
-      currentIndex = currentIndex == -1 ? 0 : currentIndex;
-      if (scrolldown) {
-        currentIndex = currentIndex + 1 >= this.optionsCount ? currentIndex : currentIndex + 1;
-      } else {
-        currentIndex = currentIndex - 1 < 0 ? currentIndex : currentIndex - 1;
-      }
+      if(this.mousewheel){
+        let scrolldown = event.deltaY > 0;
+        let currentIndex = this.options.findIndex(option => option.value == this.value);
+        currentIndex = currentIndex == -1 ? 0 : currentIndex;
+        if (scrolldown) {
+          currentIndex = currentIndex + 1 >= this.optionsCount ? currentIndex : currentIndex + 1;
+        } else {
+          currentIndex = currentIndex - 1 < 0 ? currentIndex : currentIndex - 1;
+        }
 
-      this.handleOptionSelect(this.options[currentIndex]);
-      this.resetHoverIndex();
+        this.handleOptionSelect(this.options[currentIndex]);
+        this.resetHoverIndex();
+      }
     },
 
     doDestroy() {
